@@ -1,0 +1,81 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20220217172519
+Username: FAREAST\sshrivastava
+RunAs User: FAREAST\sshrivastava
+Configuration Name: 
+Machine: SUHANISHRI (Microsoft Windows NT 10.0.22000.0)
+Host Application: C:\WINDOWS\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe
+Process ID: 21408
+PSVersion: 5.1.22000.282
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22000.282
+BuildVersion: 10.0.22000.282
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Migration\AMS-Migration\MigrationScript\MigrationLog2.txt
+
+
+02-17-2022 17:25:19  [INFO] Parsed AMSv1 ARM id -  {
+    "subscriptionId":  "53990dba-8128-4100-bb6d-ed38861c9f8f",
+    "amsV1ResourceGroup":  "sakhare_ams_hana",
+    "amsv1ResourceName":  "sakhare_ams4"
+}
+
+Name                                     Account                          SubscriptionName                Environment                     TenantId
+----                                     -------                          ----------------                -----------                     --------
+AzEngg SAP R&D (53990dba-8128-4100-bb... sshrivastava@microsoft.com       AzEngg SAP R&D                  AzureCloud                      72f988bf-86f1-41af-91ab-2d7c...
+
+
+02-17-2022 17:25:32  [INFO] Fetching secrets from KeyVault - sapmon-kv-5f0a01e687f9e3
+WARNING: Upcoming breaking changes in the cmdlet 'Get-AzADUser' :
+- The output type is changing from the existing type :'Microsoft.Azure.Commands.ActiveDirectory.PSADUser' to the new type :'Microsoft.Azure.PowerShell.Cmdlets.Resources.MSGraph.Models.ApiV10.IMicrosoftGraphUser'
+Note : Go to https://aka.ms/azps-changewarnings for steps to suppress this breaking change warning, and other information on breaking changes in Azure PowerShell.
+WARNING: Upcoming breaking changes in the cmdlet 'Set-AzKeyVaultAccessPolicy' :
+This cmdlet will use Microsoft Graph in Az 7.x and later.
+Visit https://go.microsoft.com/fwlink/?linkid=2174792 for migration guide and breaking changes.
+Note : Go to https://aka.ms/azps-changewarnings for steps to suppress this breaking change warning, and other information on breaking changes in Azure PowerShell.
+0
+[ERROR] Message : Unsupported Type - SapHana Integrated KeyVault, ErrorId : 100, Recommended Action : Please wait for the support to be enabled in AMSv2 to migrate provider - suhatest
+**********************
+Windows PowerShell transcript end
+End time: 20220217172542
+**********************
+**********************
+Windows PowerShell transcript start
+Start time: 20220217172542
+Username: FAREAST\sshrivastava
+RunAs User: FAREAST\sshrivastava
+Configuration Name: 
+Machine: SUHANISHRI (Microsoft Windows NT 10.0.22000.0)
+Host Application: C:\WINDOWS\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe
+Process ID: 21408
+PSVersion: 5.1.22000.282
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22000.282
+BuildVersion: 10.0.22000.282
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\Migration\AMS-Migration\MigrationScript\MigrationLog2.txt
+
+
+02-17-2022 17:25:42  [INFO] Migrated AMSv1 SapHana List -
+
+
+02-17-2022 17:25:42  [INFO] Migrated AMSv1 SapNeWeaver List -
+
+
+02-17-2022 17:25:42  [INFO] Not Migrated AMSv1 Unsupported Provider list -  {
+    "name":  "suhatest",
+    "type":  "SapHana"
+}
+**********************
+Windows PowerShell transcript end
+End time: 20220217172542
+**********************

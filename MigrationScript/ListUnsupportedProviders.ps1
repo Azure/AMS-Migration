@@ -3,7 +3,8 @@
     $width = 25
     Write-Host
     Write-Host
-    Write-Host "Listing unsupported provider(s)"
+    $logger.LogInfo("Listing unsupported provider(s)")
+    Write-Host
     Write-Host -ForegroundColor Magenta "     NAME                                         TYPE"
     Write-Host "|-------------------------------------------------------------------|"
     foreach ($unsupportedProvider in $unsupportedProviderList)

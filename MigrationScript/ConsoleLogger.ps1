@@ -1,18 +1,25 @@
 ﻿Class ConsoleLogger
 {
     [void] LogInfo([string]$message){
-        Write-Host "[INFO]" $message
+        Write-Host
+        Write-Host
+        $date = Get-Date -Format "MM/dd/yyyy HH:mm:ss"
+        Write-Host $date " [INFO]" $message
     }
 
     [void] LogInfoObject([string]$message, [Object]$object){
-        Start-Transcript -Path .\testlog.txt
+        Write-Host
+        Write-Host
         $serialized = $object | ConvertTo-Json -Depth 10
-        Write-Host "[INFO]" $message $serialized 
-        Stop-Transcript
+        $date = Get-Date -Format "MM/dd/yyyy HH:mm:ss"
+        Write-Host $date " [INFO]" $message $serialized
     }
 
     [void] LogWarning([string]$message){
-        Write-Warning -ForegroundColor Yellow "[WARN]" $message
+        Write-Host
+        Write-Host
+        $date = Get-Date -Format "MM/dd/yyyy HH:mm:ss"
+        Write-Warning -ForegroundColor Yellow $date " [WARN]" $message
     }
 
     [void] LogError($message, $errorId, $recommendedAction){

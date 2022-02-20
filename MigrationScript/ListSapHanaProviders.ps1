@@ -3,7 +3,8 @@
     $width = 25
     Write-Host
     Write-Host
-    Write-Host "Listing migrating SapHana provider(s)"
+    $logger.LogInfo("Listing migrating SapHana provider(s)")
+    Write-Host
     Write-Host -ForegroundColor Magenta "     NAME                                         TYPE"
     Write-Host "|-------------------------------------------------------------------|"
     foreach ($saphanaProvider in $saphanaTransformedList)
