@@ -15,15 +15,8 @@
 # ########### Header ###########
 # Refer common library file
 . $PSScriptRoot\ConsoleLogger.ps1
-. $PSScriptRoot\SetCurrentContext.ps1
-. $PSScriptRoot\ParseAmsv1ArmId.ps1
-. $PSScriptRoot\GetKeyVaultName.ps1
-. $PSScriptRoot\ListAllKeyVaultSecrets.ps1
-. $PSScriptRoot\KeyVaultRoleAssignment.ps1
-. $PSScriptRoot\ListUnsupportedProviders.ps1
-. $PSScriptRoot\ListSapHanaProviders.ps1
-. $PSScriptRoot\ListSapNetWeaverProviders.ps1
-. $PSScriptRoot\GetSecretValue.ps1
+. $PSScriptRoot\KeyvaultHelperFunctions.ps1
+. $PSScriptRoot\UtilityFunctions.ps1
 . $PSScriptRoot\ProviderTypePrompt.ps1
 # #############################
 

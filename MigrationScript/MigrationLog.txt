@@ -1,12 +1,12 @@
 ﻿**********************
 Windows PowerShell transcript start
-Start time: 20220218115049
+Start time: 20220221115352
 Username: FAREAST\sshrivastava
 RunAs User: FAREAST\sshrivastava
 Configuration Name: 
 Machine: SUHANISHRI (Microsoft Windows NT 10.0.22000.0)
 Host Application: C:\WINDOWS\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe
-Process ID: 21408
+Process ID: 6116
 PSVersion: 5.1.22000.282
 PSEdition: Desktop
 PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22000.282
@@ -19,15 +19,14 @@ SerializationVersion: 1.1.0.1
 Transcript started, output file is C:\Migration\AMS-Migration\MigrationScript\MigrationLog.txt
 
 
-02-18-2022 11:50:49  [INFO] -----------Starting migration to AMSv2--------------
+02-21-2022 11:53:52  [INFO] -----------Starting migration to AMSv2--------------
 Your choice is Yes
 
 
-02-18-2022 11:51:01  [INFO] Migrating all supported provider types - [SapHana and SapNetWeaver (soap)]
-lalalalalalalalalalalalalalalala  All
+02-21-2022 11:53:54  [INFO] Migrating all supported provider types - [SapHana and SapNetWeaver (soap)]
 
 
-02-18-2022 11:51:01  [INFO] Parsed AMSv1 ARM id -  {
+02-21-2022 11:53:54  [INFO] Parsed AMSv1 ARM id -  {
     "subscriptionId":  "53990dba-8128-4100-bb6d-ed38861c9f8f",
     "amsV1ResourceGroup":  "sakhare_ams_hana",
     "amsv1ResourceName":  "sakhare_ams4"
@@ -38,7 +37,7 @@ Name                                     Account                          Subscr
 AzEngg SAP R&D (53990dba-8128-4100-bb... sshrivastava@microsoft.com       AzEngg SAP R&D                  AzureCloud                      72f988bf-86f1-41af-91ab-2d7c...
 
 
-02-18-2022 11:51:16  [INFO] Fetching secrets from KeyVault - sapmon-kv-5f0a01e687f9e3
+02-21-2022 11:53:59  [INFO] Fetching secrets from KeyVault - sapmon-kv-5f0a01e687f9e3
 WARNING: Upcoming breaking changes in the cmdlet 'Get-AzADUser' :
 - The output type is changing from the existing type :'Microsoft.Azure.Commands.ActiveDirectory.PSADUser' to the new type :'Microsoft.Azure.PowerShell.Cmdlets.Resources.MSGraph.Models.ApiV10.IMicrosoftGraphUser'
 Note : Go to https://aka.ms/azps-changewarnings for steps to suppress this breaking change warning, and other information on breaking changes in Azure PowerShell.
@@ -48,7 +47,7 @@ Visit https://go.microsoft.com/fwlink/?linkid=2174792 for migration guide and br
 Note : Go to https://aka.ms/azps-changewarnings for steps to suppress this breaking change warning, and other information on breaking changes in Azure PowerShell.
 
 
-02-18-2022 11:51:23  [INFO] Adding the following transformed SapHana object to migration list {
+02-21-2022 11:54:05  [INFO] Adding the following transformed SapHana object to migration list {
     "name":  "hanaprov4",
     "type":  "SapHana"
 }
@@ -56,17 +55,17 @@ Note : Go to https://aka.ms/azps-changewarnings for steps to suppress this break
 [ERROR] Message : Unsupported Type - SapHana Integrated KeyVault, ErrorId : 100, Recommended Action : Please wait for the support to be enabled in AMSv2 to migrate provider - suhatest
 **********************
 Windows PowerShell transcript end
-End time: 20220218115123
+End time: 20220221115405
 **********************
 **********************
 Windows PowerShell transcript start
-Start time: 20220218115123
+Start time: 20220221115406
 Username: FAREAST\sshrivastava
 RunAs User: FAREAST\sshrivastava
 Configuration Name: 
 Machine: SUHANISHRI (Microsoft Windows NT 10.0.22000.0)
 Host Application: C:\WINDOWS\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe
-Process ID: 21408
+Process ID: 6116
 PSVersion: 5.1.22000.282
 PSEdition: Desktop
 PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.22000.282
@@ -79,20 +78,20 @@ SerializationVersion: 1.1.0.1
 Transcript started, output file is C:\Migration\AMS-Migration\MigrationScript\MigrationLog.txt
 
 
-02-18-2022 11:51:23  [INFO] Migrated AMSv1 SapHana List -  {
+02-21-2022 11:54:06  [INFO] Migrated AMSv1 SapHana List -  {
     "name":  "hanaprov4",
     "type":  "SapHana"
 }
 
 
-02-18-2022 11:51:23  [INFO] Migrated AMSv1 SapNeWeaver List -
+02-21-2022 11:54:06  [INFO] Migrated AMSv1 SapNeWeaver List -
 
 
-02-18-2022 11:51:23  [INFO] Not Migrated AMSv1 Unsupported Provider list -  {
+02-21-2022 11:54:06  [INFO] Not Migrated AMSv1 Unsupported Provider list -  {
     "name":  "suhatest",
     "type":  "SapHana"
 }
 **********************
 Windows PowerShell transcript end
-End time: 20220218115123
+End time: 20220221115406
 **********************
