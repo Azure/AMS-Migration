@@ -33,7 +33,10 @@ function Main
     $global:ENABLE_TRACE = $true
     $logger = New-Object ConsoleLogger
 
-    $logFilePath = Join-Path $PSScriptRoot '\MigrationLog.txt'
+    $date = Get-Date -Format "MM/dd/yyyy HH:mm:ss"
+    $dateStr= $date.ToString().Replace(":", "-").Replace(" ", "T")
+    $fileName = "MigrationLog_" + $dateStr
+    $logFilePath = Join-Path $PSScriptRoot "\$fileName.txt"
     Start-Transcript -Path $logFilePath
 
     $logger.LogInfo("-----------Starting migration to AMSv2--------------")
