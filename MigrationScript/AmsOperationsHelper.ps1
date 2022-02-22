@@ -43,7 +43,7 @@ $requestObj = @{
 $logger = New-Object ConsoleLogger
 PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
 #>
-function PutAmsV2HanaProvider([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $request, $logger) {
+function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $request, $logger) {
 	$rawToken = Get-AzAccessToken -ResourceTypeName Arm;
     $armToken = $rawToken.Token;
     $apiVersion = "2021-12-01-preview";
@@ -54,7 +54,7 @@ function PutAmsV2HanaProvider([string]$subscriptionId, [string]$resourceGroup, [
     };
 
 	$providerName = $request.name;
-    $bodyStr = $request.body | ConvertTo-Json ;
+    $bodyStr = $request.body | ConvertTo-Json -Depth 3;
 	[string]$url = "https://management.azure.com/";
 	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $resourceGroup;

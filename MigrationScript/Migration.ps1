@@ -87,13 +87,7 @@ function Main
 				# if the hana provider is using key vault to fetch user credentials, skip the migration. 
 				# (To be handled later, once the feature is enabled in ams v2)
                if(!$secret.properties.hanaDbPasswordKeyVaultUrl)
-               {
-                    $settings = $secret.properties
-
-                    #TODO: Transform provider setting
-                    $newSettings
-
-                    
+               {                    
 					$logger.LogInfoObject("Trying to migrate Provider", $secret.name);
 					$hanaMigrationResult = MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
 					if($hanaMigrationResult.provisiongState -eq "Succeeded"){
@@ -114,8 +108,8 @@ function Main
                         type = $secret.type
 						state = "Unsupported"
                     }
-                    $unsupportedProviderList.Add($request)
-					$logger.LogInfo("Migration for Provider $($secret.name) failed");
+					
+                    $unsupportedProviderList.Add($request) | Out-Null
                     $logger.LogError("Unsupported Type - SapHana Integrated KeyVault","100", "Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
                }
         }
@@ -127,9 +121,34 @@ function Main
 				type = $secret.type
             }
 
-            $sapNetWeaverTransformedList.Add($request) | Out-Null
-            $logger.LogInfoObject("Adding the following transformed SapNetWeaver object to migration list", $request)
-           
+            # if the hana provider is using key vault to fetch user credentials, skip the migration. 
+			# (To be handled later, once the feature is enabled in ams v2)
+            if(!$secret.properties.sapPasswordKeyVaultUrl)
+            {        
+                $logger.LogInfoObject("Trying to migrate Provider", $secret.name);
+				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -logger $logger
+				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
+                    $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $request)
+				}
+				$request = @{
+                    name = $secret.name
+                    type = $secret.type
+					state = $netweaverMigrationResult.provisiongState
+                }
+
+                $sapNetWeaverTransformedList.Add($request) | Out-Null
+            }
+            else
+               {
+                    $request = @{
+                        name = $secret.name
+                        type = $secret.type
+						state = "Unsupported"
+                    }
+					
+                    $unsupportedProviderList.Add($request) | Out-Null
+                    $logger.LogError("Unsupported Type - SapNetweaver Integrated KeyVault","101", "Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
+               }
         }
         else
         {
@@ -222,7 +241,98 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	}
 
 	# call the put provider method.
-	PutAmsV2HanaProvider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
+	PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
+		
+	# we will check the provisioning status for the provider 15 times in 20 sec intervals.
+	$checks = 0;
+
+	# default providioning state is accepted, we will keep checking till is changes.
+	$provisioningState = "Accepted";
+		
+	while ($checks -le 15 -and $provisioningState -eq "Accepted") {
+		Start-Sleep -s 20
+		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
+		$provisioningState = $getResponse.provisiongState;
+		$checks += 1;
+		Write-Host "Current Provisioning State : $provisioningState" 
+		Write-Host "Checked the status of Put Provider Call ($checks/15) times.";
+	}
+
+	if($provisioningState -eq "Succeeded") {
+		$logger.LogInfo("Provider $providerName created successfully..");
+	}
+	elseif($provisioningState -eq "Failed") {
+		$logger.LogInfo("Provider $providerName creation failed..");
+	}
+
+	return @{
+		provisiongState = $provisioningState
+	}
+}
+
+<#
+.SYNOPSIS
+Function to migrate the Hana Providers to ams v2
+
+.PARAMETER secretName
+Secret Name, this contains the name of the provider. 
+
+.PARAMETER secretValue
+Secret Value, this contains the provider configuration.
+
+.PARAMETER logger
+logger object.
+
+.EXAMPLE
+MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
+#>
+function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, $logger) {
+	$parsedArmId = Get-ParsedArmId $amsv2ArmId
+
+	[string]$monitorName = $parsedArmId.amsResourceName;
+	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
+	[string]$subscriptionId = $parsedArmId.subscriptionId;
+	# set context.
+	Set-AzContext -SubscriptionId $subscriptionId -TenantId $tenantId;
+
+	[string]$providerType = $($secretValue.type);
+	[string]$providerName = $($secretValue.name) # + (Get-Random -Minimum 2 -Maximum 20000).ToString();
+	Write-Host "Provider Name is $($secretValue.name)";
+	$providerProperties = $($secretValue.properties)
+    $metadata = $($secretValue.metadata)
+	$requestObj = @{
+		Name = $providerName
+		body = @{
+			properties = @{
+				providerSettings = @{
+					providerType = $providerType
+					sapHostname = $($providerProperties.sapHostName)
+					sapSid = $($metadata.sapSid)
+					sapInstanceNr = $($providerProperties.sapInstanceNr).ToString()
+					sapHostFileEntries = $($hostfile)
+				}
+			}
+		}
+	}
+
+	# check provider status before making a put call
+	$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
+	$provisioningState = $getResponse.provisiongState;
+	$logger.LogInfo("Current Provisioning State : $provisioningState")
+
+	if($provisioningState -eq "Succeeded") {
+		$logger.LogInfo("Provider $providerName already exists..");
+		Continue;
+	}
+	elseif ($provisioningState -eq "Failed") {
+		$managedKvName = GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
+		$funcName = GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerType $providerType -logger $logger;
+		# TODO : code to generate the key name 
+		# DeleteAndPurgeSecretFromKeyVault -keyVaultName "dummyName" -secretKey "dummyKey"
+	}
+
+	# call the put provider method.
+	PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
 		
 	# we will check the provisioning status for the provider 15 times in 20 sec intervals.
 	$checks = 0;
