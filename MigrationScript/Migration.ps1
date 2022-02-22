@@ -22,6 +22,7 @@
 . $PSScriptRoot\UtilityFunctions.ps1
 . $PSScriptRoot\ProviderTypePrompt.ps1
 . $PSScriptRoot\AmsOperationsHelper.ps1
+. $PSScriptRoot\Utilities.ps1
 # #############################
 
 function Get-Token($typeToken)
@@ -34,8 +35,13 @@ function Get-Token($typeToken)
 
 function Main
 {
+	
     $global:ENABLE_TRACE = $true
     $logger = New-Object ConsoleLogger
+
+	$logger.LogInfo("-----------Setting up Az modules for migration--------------")
+	# Install the pre-requisite modules
+	InstallModules
 
     $date = Get-Date -Format "MM/dd/yyyy HH:mm:ss"
     $dateStr= $date.ToString().Replace(":", "-").Replace(" ", "T")
@@ -51,7 +57,8 @@ function Main
     }
 
     #Uncomment the line below if running on local PowerShell
-    #Connect-AzAccount
+	$logger.LogInfo("Please select an account to connect to Azure Portal...")
+    Connect-AzAccount
 
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
@@ -255,8 +262,8 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;
 		$checks += 1;
-		Write-Host "Current Provisioning State : $provisioningState" 
-		Write-Host "Checked the status of Put Provider Call ($checks/15) times.";
+		$logger.LogInfo("Current Provisioning State : $provisioningState")
+		$logger.LogInfo("Checked the status of Put Provider Call ($checks/15) times.")
 	}
 
 	if($provisioningState -eq "Succeeded") {
@@ -349,8 +356,8 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;
 		$checks += 1;
-		Write-Host "Current Provisioning State : $provisioningState" 
-		Write-Host "Checked the status of Put Provider Call ($checks/15) times.";
+		$logger.LogInfo("Current Provisioning State : $provisioningState")
+		$logger.LogInfo("Checked the status of Put Provider Call ($checks/15) times.")
 	}
 
 	if($provisioningState -eq "Succeeded") {

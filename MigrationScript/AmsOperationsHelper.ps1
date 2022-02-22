@@ -62,8 +62,8 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
 
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 
-	Write-Host "Making Put Provider call with $url";
-	Write-Host "body $bodyStr";
+	$logger.LogInfo("Making Put Provider call with $url")
+	$logger.LogInfo("body $bodyStr")
 	try
     {
         $response = Invoke-RestMethod -Method 'Put' -Uri $url -Headers $headers -Body $bodyStr
@@ -121,7 +121,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
 	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $apiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	Write-Host "Making Get Provider call with $url";
+	$logger.LogInfo("Making Get Provider call with $url")
     
 	try
     {
@@ -179,7 +179,7 @@ function GetAmsV2MonitorProperties([string]$subscriptionId, [string]$resourceGro
 	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "?api-version=" + $apiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	Write-Host "Making Get Monitor call with $url";
+	$logger.LogInfo("Making Get Monitor call with $url")
     
 	try
     {
