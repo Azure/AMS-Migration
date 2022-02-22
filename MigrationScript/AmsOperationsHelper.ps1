@@ -131,7 +131,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogError("GetAmsV2ProviderStatus : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
+		$logger.LogError("GetAmsV2ProviderStatus : Failed with error: ($($GetProviderErrorMsg)))", "500", "");
 		$provisiongState = "Not Created"
     }
 

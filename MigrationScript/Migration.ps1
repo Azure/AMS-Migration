@@ -123,7 +123,7 @@ function Main
 				$str2 = "172.20.164.197 SAPTSTGTMCI SAPTSTGTMCI.redmond.corp.microsoft.com"
 				$str3 = "172.20.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"
 				$hostfile = @($str1,$str2,$str3)
-				
+
                 $logger.LogInfoObject("Trying to migrate Provider", $secret.name);
 				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hostfile -logger $logger
 				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
@@ -309,7 +309,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 		body = @{
 			properties = @{
 				providerSettings = @{
-					providerType = $providerType
+					providerType = "SapNetWeaver"
 					sapHostname = $($providerProperties.sapHostName)
 					sapSid = $($metadata.sapSid)
 					sapInstanceNr = $($providerProperties.sapInstanceNr).ToString()
