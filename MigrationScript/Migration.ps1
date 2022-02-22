@@ -6,10 +6,10 @@
 [string]$tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47",
 
 #[Parameter(Mandatory=$true)]
-[string]$providerType = "saphana",
+[string]$providerType = "sapnetweaver",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "/subscriptions/53990dba-8128-4100-bb6d-ed38861c9f8f/resourceGroups/sakhare_ams_hana/providers/Microsoft.HanaOnAzure/sapMonitors/sakhare_ams4",
+[string]$amsv1ArmId = "/subscriptions/53990dba-8128-4100-bb6d-ed38861c9f8f/resourceGroups/DEMO-NEU-SAP-PM1/providers/Microsoft.HanaOnAzure/sapMonitors/demo-neu-sap-monitor",
 
 #[Parameter(Mandatory=$true)]
 [string]$amsv2ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.Workloads/monitors/ams-migration-test"
@@ -115,17 +115,17 @@ function Main
         }
         elseif($secret.type -like "sapnetweaver" -and $providerType -like "sapnetweaver" -or $providerType -like "all")
         {
-            $request = @{
-				name = $secret.name
-				type = $secret.type
-            }
-
             # if the netweaver provider is using key vault to fetch user credentials, skip the migration. 
 			# (To be handled later, once the feature is enabled in ams v2)
             if(!$secret.properties.sapPasswordKeyVaultUrl)
             {        
+				$str1 = "172.20.164.196 SAPTSTGTMA1 SAPTSTGTMA1.redmond.corp.microsoft.com"
+				$str2 = "172.20.164.197 SAPTSTGTMCI SAPTSTGTMCI.redmond.corp.microsoft.com"
+				$str3 = "172.20.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"
+				$hostfile = @($str1,$str2,$str3)
+				
                 $logger.LogInfoObject("Trying to migrate Provider", $secret.name);
-				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -logger $logger
+				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hostfile -logger $logger
 				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
                     $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $request)
 				}
