@@ -115,13 +115,12 @@ function Main
         }
         elseif($secret.type -like "sapnetweaver" -and $providerType -like "sapnetweaver" -or $providerType -like "all")
         {
-            #TODO: Sample snippet here. Enhance the code
             $request = @{
 				name = $secret.name
 				type = $secret.type
             }
 
-            # if the hana provider is using key vault to fetch user credentials, skip the migration. 
+            # if the netweaver provider is using key vault to fetch user credentials, skip the migration. 
 			# (To be handled later, once the feature is enabled in ams v2)
             if(!$secret.properties.sapPasswordKeyVaultUrl)
             {        

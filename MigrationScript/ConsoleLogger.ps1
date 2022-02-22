@@ -23,8 +23,11 @@
     }
 
     [void] LogError($message, $errorId, $recommendedAction){
+        Write-Host
+        Write-Host
+        $date = Get-Date -Format "MM/dd/yyyy HH:mm:ss"
         $message = "[ERROR] " + "Message : " + $message + ", ErrorId : " + $errorId + ", Recommended Action : " + $recommendedAction
-        Write-Host -ForegroundColor Red $message 
+        Write-Host -ForegroundColor Red $date $message 
     }
     
     [void] LogException([Object]$excp, [string]$message){
