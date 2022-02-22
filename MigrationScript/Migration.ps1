@@ -89,13 +89,13 @@ function Main
 
         $secret = Get-SecretValue $i.id
 
-        if ($secret.type -like "saphana" -and $providerType -like "saphana" -or $providerType -like "all")
+        if ($secret.type -like "saphana" -and ($providerType -like "saphana" -or $providerType -like "all"))
         {
 				# if the hana provider is using key vault to fetch user credentials, skip the migration. 
 				# (To be handled later, once the feature is enabled in ams v2)
                if(!$secret.properties.hanaDbPasswordKeyVaultUrl)
                {                    
-					$logger.LogInfoObject("Trying to migrate Provider", $secret.name);
+					$logger.LogInfoObject("Trying to migrate SapHana Provider", $secret.name);
 					$hanaMigrationResult = MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
 					if($hanaMigrationResult.provisiongState -eq "Succeeded"){
                      	$logger.LogInfoObject("Adding the following transformed SapHana object to migration list", $request)
@@ -120,7 +120,7 @@ function Main
                     $logger.LogError("Unsupported Type - SapHana Integrated KeyVault","100", "Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
                }
         }
-        elseif($secret.type -like "sapnetweaver" -and $providerType -like "sapnetweaver" -or $providerType -like "all")
+        elseif($secret.type -like "sapnetweaver" -and ($providerType -like "sapnetweaver" -or $providerType -like "all"))
         {
             # if the netweaver provider is using key vault to fetch user credentials, skip the migration. 
 			# (To be handled later, once the feature is enabled in ams v2)
@@ -131,7 +131,7 @@ function Main
 				$str3 = "172.20.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"
 				$hostfile = @($str1,$str2,$str3)
 
-                $logger.LogInfoObject("Trying to migrate Provider", $secret.name);
+                $logger.LogInfoObject("Trying to migrate SapNetWeaver Provider", $secret.name);
 				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hostfile -logger $logger
 				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
                     $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $request)
