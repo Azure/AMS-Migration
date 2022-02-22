@@ -1,18 +1,18 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
-[string]$subscriptionId = "49d64d54-e966-4c46-a868-1999802b762c",
+[string]$subscriptionId = "<subscription_id>",
 
 #[Parameter(Mandatory=$true)]
-[string]$tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47",
+[string]$tenantId = "<tenant_id>",
 
 #[Parameter(Mandatory=$true)]
-[string]$providerType = "sapnetweaver",
+[string]$providerType = $null,
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "/subscriptions/53990dba-8128-4100-bb6d-ed38861c9f8f/resourceGroups/DEMO-NEU-SAP-PM1/providers/Microsoft.HanaOnAzure/sapMonitors/demo-neu-sap-monitor",
+[string]$amsv1ArmId = "<amsv1-arm-id>",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv2ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.Workloads/monitors/ams-migration-test"
+[string]$amsv2ArmId = "amsv2-arm-id"
 )
 
 # ########### Header ###########
@@ -58,7 +58,7 @@ function Main
 
     #Uncomment the line below if running on local PowerShell
 	$logger.LogInfo("Please select an account to connect to Azure Portal...")
-    Connect-AzAccount
+    #Connect-AzAccount
 
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
