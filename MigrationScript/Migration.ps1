@@ -58,7 +58,7 @@ function Main
 
     #Uncomment the line below if running on local PowerShell
 	$logger.LogInfo("Please select an account to connect to Azure Portal...")
-    #Connect-AzAccount
+    Connect-AzAccount
 
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
