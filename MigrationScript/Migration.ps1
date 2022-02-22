@@ -175,6 +175,8 @@ function Main
     $logger.LogInfoObject("Migrated AMSv1 SapNeWeaver List - ", $sapNetWeaverTransformedList)
     $logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList)
 
+	$logger.LogInfo("-----------Finishing migration to AMSv2--------------")
+
     Stop-Transcript
 }
 
