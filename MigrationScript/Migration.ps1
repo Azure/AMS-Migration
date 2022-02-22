@@ -1,18 +1,18 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
-[string]$subscriptionId = "<subscriptionId>",
+[string]$subscriptionId = "49d64d54-e966-4c46-a868-1999802b762c",
 
 #[Parameter(Mandatory=$true)]
-[string]$tenantId = "<tenantId>",
+[string]$tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47",
 
 #[Parameter(Mandatory=$true)]
 [string]$providerType = "saphana",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "<amsv1ArmId>",
+[string]$amsv1ArmId = "/subscriptions/53990dba-8128-4100-bb6d-ed38861c9f8f/resourceGroups/sakhare_ams_hana/providers/Microsoft.HanaOnAzure/sapMonitors/sakhare_ams4",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv2ArmId = "<amsv2ArmId>"
+[string]$amsv2ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.Workloads/monitors/ams-migration-test"
 )
 
 # ########### Header ###########
@@ -93,23 +93,26 @@ function Main
                     #TODO: Transform provider setting
                     $newSettings
 
-                    $request = @{
-                        name = $secret.name
-                        type = $secret.type
-                    }
-
-                    $saphanaTransformedList.Add($request) | Out-Null
+                    
 					$logger.LogInfoObject("Trying to migrate Provider", $secret.name);
 					$hanaMigrationResult = MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
 					if($hanaMigrationResult.provisiongState -eq "Succeeded"){
                      	$logger.LogInfoObject("Adding the following transformed SapHana object to migration list", $request)
 					}
+					$request = @{
+                        name = $secret.name
+                        type = $secret.type
+						state = $hanaMigrationResult.provisiongState
+                    }
+
+                    $saphanaTransformedList.Add($request) | Out-Null
                }
                else
                {
                     $request = @{
                         name = $secret.name
                         type = $secret.type
+						state = "Unsupported"
                     }
                     $unsupportedProviderList.Add($request)
 					$logger.LogInfo("Migration for Provider $($secret.name) failed");
@@ -120,8 +123,8 @@ function Main
         {
             #TODO: Sample snippet here. Enhance the code
             $request = @{
-            name = $secret.name
-            type = $secret.type
+				name = $secret.name
+				type = $secret.type
             }
 
             $sapNetWeaverTransformedList.Add($request) | Out-Null
@@ -133,8 +136,8 @@ function Main
             if($secret.type -notlike "sapnetweaver" -and $secret.type -notlike "saphana")
             {
                 $request = @{
-                name = $secret.name
-                type = $secret.type
+					name = $secret.name
+					type = $secret.type
                 }
                 
                 $unsupportedProviderList.Add($request) | Out-Null
@@ -219,7 +222,7 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	}
 
 	# call the put provider method.
-	PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
+	PutAmsV2HanaProvider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
 		
 	# we will check the provisioning status for the provider 15 times in 20 sec intervals.
 	$checks = 0;
