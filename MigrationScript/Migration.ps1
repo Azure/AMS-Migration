@@ -284,7 +284,7 @@ Secret Value, this contains the provider configuration.
 logger object.
 
 .EXAMPLE
-MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
+MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -logger $logger
 #>
 function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, $logger) {
 	$parsedArmId = Get-ParsedArmId $amsv2ArmId
@@ -309,7 +309,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 					sapHostname = $($providerProperties.sapHostName)
 					sapSid = $($metadata.sapSid)
 					sapInstanceNr = $($providerProperties.sapInstanceNr).ToString()
-					sapHostFileEntries = $($hostfile)
+					sapHostFileEntries = $hostfile
 				}
 			}
 		}
