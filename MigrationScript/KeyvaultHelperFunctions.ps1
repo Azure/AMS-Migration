@@ -27,7 +27,7 @@ function Add-KeyVaultRoleAssignment($keyVaultName)
 
     $objectId = Get-AzAdUser -UserPrincipalName $currentUserId
 
-    Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ObjectId $objectId.Id  -PermissionsToSecrets List,Get
+    Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ObjectId $objectId.Id  -PermissionsToSecrets List,Get,Set,Delete,Purge
 }
 
 function Get-SecretValue($uri)
@@ -37,4 +37,30 @@ function Get-SecretValue($uri)
 	$parsed = $secretValue.value | ConvertFrom-Json
 
     return $parsed
+}
+
+<#
+.SYNOPSIS
+Function to get a delete and purge a secret from keyvault.
+
+.PARAMETER keyVaultName
+Key vault name.
+
+.PARAMETER secretKey
+Secret name to be retrieved from key vault. 
+
+.EXAMPLE
+DeleteAndPurgeSecretFromKeyVault -keyVaultName $keyVaultName -secretKey $name
+#>
+function DeleteAndPurgeSecretFromKeyVault([string]$keyVaultName, [string]$secretKey) {
+	try {
+		Add-KeyVaultRoleAssignment -keyVaultName $keyVaultName;
+		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -PassThru -Force
+		Start-Sleep -s 15
+		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -InRemovedState -PassThru -Force;
+		return $true;
+	} catch {
+		$deleteerrMsg = $_.exception.message
+		throw "DeleteAndPurgeSecretFromKeyVault, Failed with error: ($deleteerrMsg)";
+	}
 }

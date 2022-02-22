@@ -1,8 +1,34 @@
-﻿function Set-CurrentContext($subscriptionId, $tenantId, $logger)
+﻿<#
+.SYNOPSIS
+Function to set the Context using subscription id and Tenant Id.
+
+.PARAMETER subscriptionId
+Subscription Id for the AMS Monitor.
+
+.PARAMETER tenantId
+tenant Id for the AMS Monitor.
+
+.PARAMETER logger
+logger object.
+
+.EXAMPLE
+Set-CurrentContext -subscriptionId $subscriptionId -tenantId $tenantId -logger $logger
+#>
+function Set-CurrentContext($subscriptionId, $tenantId, $logger)
 {
     Get-AzSubscription -SubscriptionId $subscriptionId -TenantId $tenantId | Set-AzContext
 }
 
+<#
+.SYNOPSIS
+Function that parses the ARM id and returns the Subscriptionid, ResourceGroupName, Monitor name.
+
+.PARAMETER armId
+ARM Id for the AMS v1 monitor.
+
+.EXAMPLE
+Get-ParsedArmId -armId $armId
+#>
 function Get-ParsedArmId($armId)
 {
     $CharArray =$armId.Split("/")
@@ -10,8 +36,8 @@ function Get-ParsedArmId($armId)
 
     $parsedInput = @{
         subscriptionId = $CharArray[$i]
-        amsV1ResourceGroup = $CharArray[$i+2]
-        amsv1ResourceName = $CharArray[$CharArray.Length-1]
+        amsResourceGroup = $CharArray[$i+2]
+        amsResourceName = $CharArray[$CharArray.Length-1]
     }
 
     return $parsedInput
