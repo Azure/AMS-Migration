@@ -280,6 +280,9 @@ Secret Name, this contains the name of the provider.
 .PARAMETER secretValue
 Secret Value, this contains the provider configuration.
 
+.PARAMETER hostfile
+hostfile object.
+
 .PARAMETER logger
 logger object.
 

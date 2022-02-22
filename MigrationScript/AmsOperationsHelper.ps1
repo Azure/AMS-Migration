@@ -63,7 +63,7 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 
 	Write-Host "Making Put Provider call with $url";
-	# Write-Host "body $bodyStr";
+	Write-Host "body $bodyStr";
 	try
     {
         $response = Invoke-RestMethod -Method 'Put' -Uri $url -Headers $headers -Body $bodyStr
