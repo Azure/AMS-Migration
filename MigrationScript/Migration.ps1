@@ -22,6 +22,7 @@
 . $PSScriptRoot\UtilityFunctions.ps1
 . $PSScriptRoot\ProviderTypePrompt.ps1
 . $PSScriptRoot\AmsOperationsHelper.ps1
+. $PSScriptRoot\Constants.ps1
 # #############################
 
 function Get-Token($typeToken)

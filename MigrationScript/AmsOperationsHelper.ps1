@@ -3,6 +3,7 @@
 . $PSScriptRoot\ConsoleLogger.ps1
 . $PSScriptRoot\UtilityFunctions.ps1
 . $PSScriptRoot\KeyvaultHelperFunctions.ps1
+. $PSScriptRoot\Constants.ps1
 # #############################
 
 <#
@@ -46,7 +47,7 @@ PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupNa
 function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $request, $logger) {
 	$rawToken = Get-AzAccessToken -ResourceTypeName Arm;
     $armToken = $rawToken.Token;
-    $apiVersion = "2021-12-01-preview";
+    $v2ApiVersion = "2021-12-01-preview";
 
 	$headers = @{
         "Content-Type" = "application/json"
@@ -58,7 +59,7 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
 	[string]$url = "https://management.azure.com/";
 	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
-	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $apiVersion;
+	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $v2ApiVersion;
 
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 
@@ -108,7 +109,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
 {
     $rawToken = Get-AzAccessToken -ResourceTypeName Arm
     $armToken = $rawToken.Token
-	$apiVersion = "2021-12-01-preview";
+	$v2ApiVersion = "2021-12-01-preview";
 
     $headers = @{
         "Content-Type" = "application/json"
@@ -118,7 +119,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
     [string]$url = "https://management.azure.com/";
 	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
-	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $apiVersion;
+	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
 	$logger.LogInfo("Making Get Provider call with $url")
@@ -166,7 +167,7 @@ function GetAmsV2MonitorProperties([string]$subscriptionId, [string]$resourceGro
 {
     $rawToken = Get-AzAccessToken -ResourceTypeName Arm
     $armToken = $rawToken.Token
-	$apiVersion = "2021-12-01-preview";
+	$v2ApiVersion = "2021-12-01-preview";
 
     $headers = @{
         "Content-Type" = "application/json"
@@ -176,7 +177,7 @@ function GetAmsV2MonitorProperties([string]$subscriptionId, [string]$resourceGro
     [string]$url = "https://management.azure.com/";
 	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
-	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "?api-version=" + $apiVersion;
+	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
 	$logger.LogInfo("Making Get Monitor call with $url")
