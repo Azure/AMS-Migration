@@ -117,7 +117,9 @@ function Main
                     }
 					
                     $unsupportedProviderList.Add($request) | Out-Null
-                    $logger.LogError("Unsupported Type - SapHana Integrated KeyVault","100", "Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
+                    $logger.LogError("Unsupported Type - SapHana Integrated KeyVault",
+						"100",
+						"Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
                }
         }
         elseif($secret.type -like "sapnetweaver" -and ($providerType -like "sapnetweaver" -or $providerType -like "all"))
@@ -153,7 +155,9 @@ function Main
                     }
 					
                     $unsupportedProviderList.Add($request) | Out-Null
-                    $logger.LogError("Unsupported Type - SapNetweaver Integrated KeyVault","101", "Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
+                    $logger.LogError("Unsupported Type - SapNetweaver Integrated KeyVault",
+						"101",
+						"Please wait for the support to be enabled in AMSv2 to migrate provider - " + $secret.name)                  
                }
         }
         else
