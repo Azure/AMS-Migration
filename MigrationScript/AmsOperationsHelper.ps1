@@ -71,8 +71,7 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
     catch
     {
         $putErrorMsg = $_.ErrorDetails | ConvertTo-Json -Depth 10;
-		Write-Host ($($putErrorMsg.error.code));
-		$logger.LogError("Put-AmsV2Provider : Failed with error: ($($putErrorMsg.error.code))", "", "");
+		$logger.LogError("Put-AmsV2Provider : Failed with error: ($($putErrorMsg))", "", "");
     }
 
 	return @{
