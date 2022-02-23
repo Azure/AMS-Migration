@@ -35,7 +35,6 @@ function Get-Token($typeToken)
 
 function Main
 {
-	
     $global:ENABLE_TRACE = $true
     $logger = New-Object ConsoleLogger
 
@@ -56,7 +55,7 @@ function Main
         $providerType = Check-ProviderTypeInput
     }
 
-    #Uncomment the line below if running on local PowerShell
+    #Comment the line below if not running on local PowerShell
 	$logger.LogInfo("Please select an account to connect to Azure Portal...")
     Connect-AzAccount
 
@@ -97,16 +96,18 @@ function Main
                {                    
 					$logger.LogInfoObject("Trying to migrate SapHana Provider", $secret.name);
 					$hanaMigrationResult = MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
-					if($hanaMigrationResult.provisiongState -eq "Succeeded"){
-                     	$logger.LogInfoObject("Adding the following transformed SapHana object to migration list", $request)
-					}
-					$request = @{
+
+					$requestHana = @{
                         name = $secret.name
                         type = $secret.type
 						state = $hanaMigrationResult.provisiongState
                     }
 
-                    $saphanaTransformedList.Add($request) | Out-Null
+					if($hanaMigrationResult.provisiongState -eq "Succeeded"){
+						$logger.LogInfoObject("Adding the following transformed SapHana object to migration list", $requestHana)
+				   	}
+
+                    $saphanaTransformedList.Add($requestHana) | Out-Null
                }
                else
                {
@@ -131,17 +132,19 @@ function Main
 				$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json"
 
                 $logger.LogInfoObject("Trying to migrate SapNetWeaver Provider", $secret.name);
-				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable["suha1"] -logger $logger
-				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
-                    $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $request)
-				}
-				$request = @{
+				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable[$secret.name] -logger $logger
+
+				$requestNet = @{
                     name = $secret.name
                     type = $secret.type
 					state = $netweaverMigrationResult.provisiongState
                 }
 
-                $sapNetWeaverTransformedList.Add($request) | Out-Null
+				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
+                    $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $requestNet)
+				}
+
+                $sapNetWeaverTransformedList.Add($requestNet) | Out-Null
             }
             else
                {
@@ -258,7 +261,7 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	# default providioning state is accepted, we will keep checking till is changes.
 	$provisioningState = "Accepted";
 		
-	while ($checks -le 15 -and $provisioningState -eq "Accepted") {
+	while ($checks -le 15 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
 		Start-Sleep -s 20
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;
@@ -295,6 +298,8 @@ function SetNetweaverRequestBody($providerProperties, $metadata, $hostfile)
 			}
 		}
 	}
+    $str = ConvertTo-Json $requestObj -Depth 5
+    Write-Host "netweaverrrrrrrrrrrrrrrrrrr  " $str
 	return $requestObj
 }
 
@@ -358,7 +363,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	# default providioning state is accepted, we will keep checking till is changes.
 	$provisioningState = "Accepted";
 		
-	while ($checks -le 15 -and $provisioningState -eq "Accepted") {
+	while ($checks -le 15 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
 		Start-Sleep -s 20
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;

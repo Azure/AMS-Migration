@@ -1,6 +1,6 @@
 [
     {
-        "providerName":"suha1",
+        "providerName":"suha-nwprovider-2",
         "sapHostFileEntries": ["172.20.164.196 SAPTSTGTMA1 SAPTSTGTMA1.redmond.corp.microsoft.com","172.20.164.197 SAPTSTGTMCI SAPTSTGTMCI.redmond.corp.microsoft.com","172.20.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"]
     },
     {
