@@ -162,3 +162,25 @@ function InstallModules()
         Import-Module AzureAD
     }
 }
+
+function ParseSapNetWeaverHostfile($fileName)
+{
+    $fileName = "hosts.json"
+
+    $logFilePath = Join-Path $PSScriptRoot "\$fileName"
+
+    $content = (Get-Content "$logFilePath" | Out-String)
+    $content = ConvertFrom-Json $content
+
+    $hashTable = @{}
+
+    foreach($i in $content)
+    {
+        Write-Host $i.providerName
+        Write-Host $i.sapHostFileEntries.Count
+        Write-Host "---------------------------------"
+        
+        $hashTable.add($i.providerName,$i.sapHostFileEntries)
+    }
+    return $hashTable
+}

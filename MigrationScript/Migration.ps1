@@ -127,14 +127,11 @@ function Main
             # if the netweaver provider is using key vault to fetch user credentials, skip the migration. 
 			# (To be handled later, once the feature is enabled in ams v2)
             if(!$secret.properties.sapPasswordKeyVaultUrl)
-            {        
-				$str1 = "172.20.164.196 SAPTSTGTMA1 SAPTSTGTMA1.redmond.corp.microsoft.com"
-				$str2 = "172.20.164.197 SAPTSTGTMCI SAPTSTGTMCI.redmond.corp.microsoft.com"
-				$str3 = "172.20.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"
-				$hostfile = @($str1,$str2,$str3)
+            {
+				$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json"
 
                 $logger.LogInfoObject("Trying to migrate SapNetWeaver Provider", $secret.name);
-				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hostfile -logger $logger
+				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable["suha1"] -logger $logger
 				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
                     $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $request)
 				}
@@ -282,6 +279,25 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	}
 }
 
+function SetNetweaverRequestBody($providerProperties, $metadata, $hostfile)
+{
+	$requestObj = @{
+		Name = $providerName
+		body = @{
+			properties = @{
+				providerSettings = @{
+					providerType = $netweaverProviderType
+					sapHostname = $($providerProperties.sapHostName)
+					sapSid = $($metadata.sapSid)
+					sapInstanceNr = $($providerProperties.sapInstanceNr).ToString()
+					sapHostFileEntries = $hostfile
+				}
+			}
+		}
+	}
+	return $requestObj
+}
+
 <#
 .SYNOPSIS
 Function to migrate the Hana Providers to ams v2
@@ -315,20 +331,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	Write-Host "Provider Name is $($secretValue.name)";
 	$providerProperties = $($secretValue.properties)
     $metadata = $($secretValue.metadata)
-	$requestObj = @{
-		Name = $providerName
-		body = @{
-			properties = @{
-				providerSettings = @{
-					providerType = $netweaverProviderType
-					sapHostname = $($providerProperties.sapHostName)
-					sapSid = $($metadata.sapSid)
-					sapInstanceNr = $($providerProperties.sapInstanceNr).ToString()
-					sapHostFileEntries = $hostfile
-				}
-			}
-		}
-	}
+	$requestObj = SetNetweaverRequestBody -providerProperties $providerProperties -metadata $metadata -hostfile $hostfile
 
 	# check provider status before making a put call
 	$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
