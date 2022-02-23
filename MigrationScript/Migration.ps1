@@ -311,7 +311,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	Set-AzContext -SubscriptionId $subscriptionId -TenantId $tenantId;
 
 	[string]$providerType = $($secretValue.type);
-	[string]$providerName = $($secretValue.name) # + (Get-Random -Minimum 2 -Maximum 20000).ToString();
+	[string]$providerName = $($secretValue.name)
 	Write-Host "Provider Name is $($secretValue.name)";
 	$providerProperties = $($secretValue.properties)
     $metadata = $($secretValue.metadata)
