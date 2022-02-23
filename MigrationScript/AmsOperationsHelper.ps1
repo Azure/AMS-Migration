@@ -64,7 +64,6 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 
 	$logger.LogInfo("Making Put Provider call with $url")
-	$logger.LogInfo("body $bodyStr")
 	try
     {
         $response = Invoke-RestMethod -Method 'Put' -Uri $url -Headers $headers -Body $bodyStr
