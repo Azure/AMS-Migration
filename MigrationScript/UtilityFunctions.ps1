@@ -16,6 +16,7 @@ Set-CurrentContext -subscriptionId $subscriptionId -tenantId $tenantId -logger $
 #>
 function Set-CurrentContext($subscriptionId, $tenantId, $logger)
 {
+	$logger.LogInfo("Setting context for the current user with SubscriptionId $subscriptionId and tenant $tenantId");
     Get-AzSubscription -SubscriptionId $subscriptionId -TenantId $tenantId | Set-AzContext
 }
 
@@ -43,6 +44,17 @@ function Get-ParsedArmId($armId)
     return $parsedInput
 }
 
+<#
+.SYNOPSIS
+Function to get the SAP Netweaver Provider List.
+Prints a summary of all the SAP Netweaver Providers in Azure AMS v2.
+
+.PARAMETER sapNetWeaverTransformedList
+List of SAP Netweaver Providers.
+
+.EXAMPLE
+Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
+#>
 function Get-SapNetWeaverProvidersList($sapNetWeaverTransformedList)
 {
     $width = 25
@@ -71,6 +83,17 @@ function Get-SapNetWeaverProvidersList($sapNetWeaverTransformedList)
     Write-Host "|-------------------------------------------------------------------|"
 }
 
+<#
+.SYNOPSIS
+Function to get the SAP Provider list which are not supported.
+Prints a summary of all the unsupported SAP Providers in Azure AMS v2.
+
+.PARAMETER unsupportedProviderList
+List of SAP Providers which are not supported currently.
+
+.EXAMPLE
+Get-UnsupportedProvidersList $unsupportedProviderList
+#>
 function Get-UnsupportedProvidersList($unsupportedProviderList)
 {
     $width = 25
@@ -99,6 +122,17 @@ function Get-UnsupportedProvidersList($unsupportedProviderList)
     Write-Host "|-------------------------------------------------------------------|"
 }
 
+<#
+.SYNOPSIS
+Function to get the SAP Hana Provider List.
+Prints a summary of all the SAP Hana Providers in Azure AMS v2.
+
+.PARAMETER saphanaTransformedList
+List of SAP HANA Providers.
+
+.EXAMPLE
+ Get-SapHanaProvidersList $saphanaTransformedList
+#>
 function Get-SapHanaProvidersList($saphanaTransformedList)
 {
     $width = 25
@@ -128,6 +162,13 @@ function Get-SapHanaProvidersList($saphanaTransformedList)
 }
 
 # Install module pre-requisites
+<#
+.SYNOPSIS
+Function to Install azure module pre-requisites
+
+.EXAMPLE
+InstallModules
+#>
 function InstallModules()
 {
     try {
@@ -163,8 +204,24 @@ function InstallModules()
     }
 }
 
-function ParseSapNetWeaverHostfile($fileName)
+<#
+.SYNOPSIS
+Function to Parse all the SAP Netweaver host file entries.
+
+.PARAMETER fileName
+Path of the 
+.PARAMETER logger
+Parameter description
+
+.EXAMPLE
+An example
+
+.NOTES
+General notes
+#>
+function ParseSapNetWeaverHostfile($fileName, $logger)
 {
+	$logger.LogInfo("Parsing host.json file.");
     $fileName = "hosts.json"
 
     $logFilePath = Join-Path $PSScriptRoot "\$fileName"
@@ -176,10 +233,8 @@ function ParseSapNetWeaverHostfile($fileName)
 
     foreach($i in $content)
     {
-        Write-Host $i.providerName
-        Write-Host $i.sapHostFileEntries.Count
-        Write-Host "---------------------------------"
-        
+        $logger.LogInfo("Found Provider $($i.providerName)");
+        $logger.LogInfo("with host file entries : $($i.sapHostFileEntries)");
         $hashTable.add($i.providerName,$i.sapHostFileEntries)
     }
     return $hashTable
