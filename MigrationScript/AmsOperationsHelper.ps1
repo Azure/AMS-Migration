@@ -129,7 +129,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogError("GetAmsV2ProviderStatus : Failed with error: ($($GetProviderErrorMsg)))", "500", "");
+		$logger.LogInfo("GetAmsV2ProviderStatus : $($GetProviderErrorMsg)");
 		$provisiongState = "Not Created"
     }
 
@@ -340,7 +340,7 @@ function GetAmsV1ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogInfo("GetAmsV2ProviderStatus : ($($GetProviderErrorMsg)))");
+		$logger.LogInfo("GetAmsV1ProviderStatus : $($GetProviderErrorMsg)");
 		[string]$provisiongState = "Not Created"
     }
 	return $provisiongState;
