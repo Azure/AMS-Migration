@@ -1,18 +1,12 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
-[string]$subscriptionId = "49d64d54-e966-4c46-a868-1999802b762c",
+[string]$providerType = $null,
 
 #[Parameter(Mandatory=$true)]
-[string]$tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47",
+[string]$amsv1ArmId = "<amsv1_arm_id>",
 
 #[Parameter(Mandatory=$true)]
-[string]$providerType = "sapnetweaver",
-
-#[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.HanaOnAzure/sapMonitors/ams-v1-migration-netweaver",
-
-#[Parameter(Mandatory=$true)]
-[string]$amsv2ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.Workloads/monitors/ams-migration-test"
+[string]$amsv2ArmId = "<amsv2_arm_id>"
 )
 
 # ########### Header ###########
