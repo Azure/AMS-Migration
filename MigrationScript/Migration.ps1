@@ -157,6 +157,12 @@ function Main
 				$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json" -logger $logger;
 
                 $logger.LogInfoObject("Trying to migrate SapNetWeaver Provider", $secret.name);
+
+				if(!$hashTable.ContainsKey($secret.name))
+				{
+					$hashTable.Add($secret.name, @())
+				}
+
 				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable[$secret.name] -logger $logger
 
 				$requestNet = @{
