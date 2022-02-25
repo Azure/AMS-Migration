@@ -160,7 +160,8 @@ function Main
 
 				if(!$hashTable.ContainsKey($secret.name))
 				{
-					$hashTable.Add($secret.name, @())
+					$hashTable.Add($secret.name, @());
+					$logger.LogInfo("Provider $($secret.name) not found in hosts file. Setting empty hostfile entry[]");
 				}
 
 				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable[$secret.name] -logger $logger
