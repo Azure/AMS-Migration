@@ -330,18 +330,18 @@ function GetAmsV1ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
 	[string]$providerParams = "/providers/Microsoft.HanaOnAzure/sapMonitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	$logger.LogInfo("Making Get Provider call with $url")
+	$logger.LogInfo("Making Get Provider call with $url");
     
 	try
     {
         $response = Invoke-RestMethod -Method 'get' -Uri $url -Headers $headers;
-		[string]$provisiongState = $response.properties.provisioningState
+		[string]$provisiongState = $response.properties.provisioningState;
     }
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
 		$logger.LogInfo("GetAmsV1ProviderStatus : $($GetProviderErrorMsg)");
-		[string]$provisiongState = "Not Created"
+		[string]$provisiongState = "Not Created";
     }
 	return $provisiongState;
 }

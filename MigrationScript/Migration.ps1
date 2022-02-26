@@ -1,12 +1,18 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
+[string]$subscriptionId = "<subscription_id>",
+
+#[Parameter(Mandatory=$true)]
+[string]$tenantId = "<tenant_id>",
+
+#[Parameter(Mandatory=$true)]
 [string]$providerType = $null,
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "<amsv1_arm_id>",
+[string]$amsv1ArmId = "<amsv1-arm-id>",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv2ArmId = "<amsv2_arm_id>"
+[string]$amsv2ArmId = "<amsv2-arm-id>"
 )
 
 # ########### Header ###########
@@ -64,6 +70,16 @@ function Main
         $providerType = Check-ProviderTypeInput
     }
 
+	$allowedProviders = "saphana", "sapnetweaver", "all";
+
+	if($allowedProviders -notcontains $providerType) {
+		$logger.LogError(
+			"Provider Type from Parameters $providerType is currently not supported", 
+			"500", 
+			"Accepted values for Provider Type parameter are saphana, sapnetweaver, all");
+		return;
+	}
+
     $logger.LogInfo("Please select an account to connect to Azure Portal...")
     Connect-AzAccount
 
@@ -89,13 +105,6 @@ function Main
     $saphanaTransformedList = New-Object System.Collections.ArrayList
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
     $unsupportedProviderList = New-Object System.Collections.ArrayList
-
-	if($providerType -notlike "saphana" -and $providerType -notlike "all" -and $providerType -notlike "sapnetweaver") {
-		$logger.LogError(
-			"Provider Type from Parameters $providerType is currently not supported", 
-			"500", 
-			"Accepted values for Provider Type parameter are saphana, sapnetweaver, all");
-	}
 
     foreach ($i in $listOfSecrets.value)
     {
@@ -157,7 +166,14 @@ function Main
 					$hashTable.Add($secret.name, @());
 					$logger.LogInfo("Provider $($secret.name) not found in hosts file. Setting empty hostfile entry[]");
 				}
-
+				
+				$sid = $secret.metadata.sapSid.ToString();
+				if(($sid.Length) -eq 0) {
+					$logger.LogInfo("Provider $($secret.name) does not have SAP SID");
+					$sid = Get-ProviderSapSid -providerName $secret.name -logger $logger;
+					$secret.metadata.sapSid = $sid;
+				}
+				
 				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable[$secret.name] -logger $logger
 
 				$requestNet = @{
