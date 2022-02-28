@@ -23,3 +23,23 @@
 
     return $providerType
 }
+
+function Get-ProviderSapSid([string]$providerName, $logger)
+{
+    Add-Type -AssemblyName PresentationCore,PresentationFramework
+    # $MessageIcon = [System.Windows.MessageBoxImage]::Warning
+    [void][Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
+ 
+	[string]$sapSid = "";
+	while ($sapSid.Length -lt 3) {
+		[string]$messageTitle = 'Enter SAP SID'
+		[string]$dialogContent = "SAP SID property not found for provider $providerName." + "`n`n" +
+		"Please enter a 3 letter SAP SID for provider $providerName"
+		$sapSid = [Microsoft.VisualBasic.Interaction]::InputBox($dialogContent, $messageTitle);
+	}
+	$sapSid = $sapSid.ToUpper();
+	$sapSid = $sapSid.Substring(0,3);
+    $logger.LogInfo("For provider $providerName, User entered SAP SID : $($sapSid)");
+    return $sapSid;
+}
+

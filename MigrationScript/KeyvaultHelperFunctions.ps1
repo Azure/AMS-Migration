@@ -1,4 +1,14 @@
-﻿function Get-KeyVaultName($amsv1ArmId)
+﻿<#
+.SYNOPSIS
+Function to generate keyvault name using arm id for ams v1 monitor.
+
+.PARAMETER amsv1ArmId
+Arm Id for AMS v1.
+
+.EXAMPLE
+Get-KeyVaultName -amsv1ArmId $amsv1ArmId 
+#>
+function Get-KeyVaultName($amsv1ArmId)
 {
     $md5 = New-Object -TypeName System.Security.Cryptography.MD5CryptoServiceProvider
     $utf8 = New-Object -TypeName System.Text.UTF8Encoding
@@ -14,25 +24,70 @@
     return $keyVaultName
 }
 
-function Get-AllKeyVaultSecrets($KeyVaultToken, $keyVaultName)
+<#
+.SYNOPSIS
+Function to get all secrets from keyvault.
+
+.PARAMETER KeyVaultToken
+jwt token.
+
+.PARAMETER keyVaultName
+Keyvault name.
+
+.EXAMPLE
+Get-AllKeyVaultSecrets -KeyVaultToken $KeyVaultToken -keyVaultName $keyVaultName;
+#>
+function Get-AllKeyVaultSecrets([string]$KeyVaultToken, [string]$keyVaultName)
 {
-    $apiVersion = "2016-10-01"
+    [string]$apiVersion = "2016-10-01"
     return Invoke-RestMethod -Uri "https://$keyVaultName.vault.azure.net/secrets?api-version=$apiVersion" -Method GET -Headers @{Authorization="Bearer $KeyVaultToken"}
 }
 
-function Add-KeyVaultRoleAssignment($keyVaultName)
+<#
+.SYNOPSIS
+Function to add role assignments to keyvault
+It adds List, Get, Set, Delete, Purge Permissions for Secrets.
+
+.PARAMETER keyVaultName
+Keyvault Name.
+
+.PARAMETER logger
+Logger Object.
+
+.EXAMPLE
+$logger = New-Object ConsoleLogger
+Add-KeyVaultRoleAssignment -keyVaultName $keyVaultName -logger $logger;
+#>
+function Add-KeyVaultRoleAssignment([string]$keyVaultName, $logger)
 {
-    $currentUser = Get-AzContext | ConvertTo-Json | ConvertFrom-Json
-    $currentUserId = $currentUser.Account.Id
-
-    $objectId = Get-AzAdUser -UserPrincipalName $currentUserId
-
-    Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ObjectId $objectId.Id  -PermissionsToSecrets List,Get,Set,Delete,Purge
+	try {
+		$currentUser = Get-AzContext | ConvertTo-Json | ConvertFrom-Json;
+		$logger.LogInfo("Current Principle Name is : $($currentUser.Account.Id)");
+		Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -UserPrincipalName $currentUser.Account.Id  -PermissionsToSecrets List,Get,Set,Delete,Purge
+		$logger.LogInfo("Added Access Policy for User $($currentUser.Account.Id) in Keyvault $keyVaultName");
+	}
+	catch {
+		$addPolicyError = $_.exception.message
+		throw "Add-KeyVaultRoleAssignment, Failed with error: ($addPolicyError)";
+	}
 }
 
-function Get-SecretValue($uri)
+<#
+.SYNOPSIS
+Function to get a secret from keyvault.
+
+.PARAMETER uri
+Secret uri.
+
+.PARAMETER keyVaultToken
+jwt token.
+
+.EXAMPLE
+An example
+#>
+function Get-SecretValue([string]$uri, [string]$keyVaultToken)
 {
-    $newUri = $i.id + "?api-version=2016-10-01"
+    [string]$newUri = $i.id + "?api-version=2016-10-01"
 	$secretValue = Invoke-RestMethod -Uri $newUri -Method GET -Headers @{Authorization="Bearer $keyVaultToken"}
 	$parsed = $secretValue.value | ConvertFrom-Json
 
@@ -50,14 +105,16 @@ Key vault name.
 Secret name to be retrieved from key vault. 
 
 .EXAMPLE
-DeleteAndPurgeSecretFromKeyVault -keyVaultName $keyVaultName -secretKey $name
+DeleteAndPurgeSecretFromKeyVault -keyVaultName $keyVaultName -secretKey $name -logger $logger;
 #>
-function DeleteAndPurgeSecretFromKeyVault([string]$keyVaultName, [string]$secretKey) {
+function DeleteAndPurgeSecretFromKeyVault([string]$keyVaultName, [string]$secretKey, $logger) {
 	try {
-		Add-KeyVaultRoleAssignment -keyVaultName $keyVaultName;
-		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -PassThru -Force
+		Add-KeyVaultRoleAssignment -keyVaultName $keyVaultName -logger $logger;
+		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -PassThru -Force -ErrorAction SilentlyContinue;
+		$logger.LogInfo("Deleted Secret $secretKey from Keyvault $keyVaultName, Sleeping for 15s");
 		Start-Sleep -s 15
-		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -InRemovedState -PassThru -Force;
+		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -InRemovedState -PassThru -Force -ErrorAction SilentlyContinue;
+		$logger.LogInfo("Purged Secret $secretKey from Keyvault $keyVaultName");
 		return $true;
 	} catch {
 		$deleteerrMsg = $_.exception.message

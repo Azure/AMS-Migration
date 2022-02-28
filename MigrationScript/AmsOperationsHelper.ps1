@@ -1,9 +1,6 @@
 # ########### Header ###########
 # Refer common library file
 . $PSScriptRoot\ConsoleLogger.ps1
-. $PSScriptRoot\UtilityFunctions.ps1
-. $PSScriptRoot\KeyvaultHelperFunctions.ps1
-. $PSScriptRoot\Constants.ps1
 # #############################
 
 <#
@@ -41,6 +38,7 @@ $requestObj = @{
 					}
 				}
 			}
+. $PSScriptRoot\ConsoleLogger.ps1
 $logger = New-Object ConsoleLogger
 PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
 #>
@@ -71,7 +69,7 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
     catch
     {
         $putErrorMsg = $_.ErrorDetails | ConvertTo-Json -Depth 10;
-		$logger.LogError("Put-AmsV2Provider : Failed with error: ($($putErrorMsg))", "", "");
+		$logger.LogInfo("Put-AmsV2Provider: ($($putErrorMsg))");
     }
 
 	return @{
@@ -100,6 +98,7 @@ Provider name.
 logger object. 
 
 .EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
 $logger = New-Object ConsoleLogger
 GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 #>
@@ -130,7 +129,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogError("GetAmsV2ProviderStatus : Failed with error: ($($GetProviderErrorMsg)))", "500", "");
+		$logger.LogInfo("GetAmsV2ProviderStatus : $($GetProviderErrorMsg)");
 		$provisiongState = "Not Created"
     }
 
@@ -158,13 +157,14 @@ AMS v2 Monitor Name.
 logger object. 
 
 .EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
 $logger = New-Object ConsoleLogger
 GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
 #>
 function GetAmsV2MonitorProperties([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $logger)
 {
-    $rawToken = Get-AzAccessToken -ResourceTypeName Arm
-    $armToken = $rawToken.Token
+    $rawToken = Get-AzAccessToken -ResourceTypeName Arm;
+    $armToken = $rawToken.Token;
 	$v2ApiVersion = "2021-12-01-preview";
 
     $headers = @{
@@ -178,25 +178,25 @@ function GetAmsV2MonitorProperties([string]$subscriptionId, [string]$resourceGro
 	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	$logger.LogInfo("Making Get Monitor call with $url")
+	$logger.LogInfo("Making Get Monitor call with $url");
     
 	try
     {
         $response = Invoke-RestMethod -Method 'get' -Uri $url -Headers $headers;
-		$provisiongState = $response.properties.provisioningState
+		$provisiongState = $response.properties.provisioningState;
     }
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogError("GetAmsV2MonitorProperties : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
-		$provisiongState = "Not Created"
+		$logger.LogInfo("GetAmsV2MonitorProperties : ($($GetProviderErrorMsg.error.code)))");
+		$provisiongState = "Not Created";
     }
 
 	return @{
 		Response = $response
 		provisiongState = $provisiongState
 		Error = $GetProviderErrorMsg
-	}
+	};
 }
 
 <#
@@ -216,6 +216,7 @@ AMS v2 Monitor Name.
 logger object. 
 
 .EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
 $logger = New-Object ConsoleLogger
 GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
 #>
@@ -238,10 +239,7 @@ function GetAmsV2ManagedKv([string]$subscriptionId, [string]$resourceGroup, [str
 		$logger.LogError("GetAmsV2ManagedKv : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
     }
 
-	return @{
-		Response = $managedKvName
-		Error = $GetProviderErrorMsg
-	}
+	return $managedKvName;
 }
 
 <#
@@ -264,6 +262,7 @@ Provider Type.
 logger object. 
 
 .EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
 $logger = New-Object ConsoleLogger
 GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
 #>
@@ -276,7 +275,7 @@ function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [s
 		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
 		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
 
-		$funcDetails = Get-AzResource -ResourceGroupName $managedRgName -Name "$providerName*" -ResourceType Microsoft.Web/sites
+		$funcDetails = Get-AzResource -ResourceGroupName $managedRgName -Name "$providerType*" -ResourceType Microsoft.Web/sites
 		$logger.LogInfo("Function app for Provider $providerName with Monitor : $monitorName is $($funcDetails.Name)");
 		$managedFuncName = $funcDetails.Name;
     }
@@ -286,8 +285,63 @@ function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [s
 		$logger.LogError("GetAmsV2ManagedKv : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
     }
 
-	return @{
-		Response = $managedFuncName
-		Error = $GetProviderErrorMsg
-	}
+	return $managedFuncName;
+}
+
+
+<#
+.SYNOPSIS
+Function to get the deployment status for Provider.
+
+.PARAMETER subscriptionId
+SubscriptionId of the AMS v1 Monitor.
+
+.PARAMETER resourceGroup
+Resource Group Name of the AMS v1 Monitor.
+
+.PARAMETER monitorName
+AMS v1 Monitor Name.
+
+.PARAMETER providerName
+Provider name.
+
+.PARAMETER logger
+logger object. 
+
+.EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
+$logger = New-Object ConsoleLogger
+GetAmsV1ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
+#>
+function GetAmsV1ProviderStatus([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, [string]$providerName, $logger)
+{
+    $rawToken = Get-AzAccessToken -ResourceTypeName Arm
+    $armToken = $rawToken.Token
+	$v2ApiVersion = "2020-02-07-preview";
+
+    $headers = @{
+        "Content-Type" = "application/json"
+        "Authorization" = "Bearer $armToken"
+    }
+
+    [string]$url = $url = "https://management.azure.com/"
+	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
+	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
+	[string]$providerParams = "/providers/Microsoft.HanaOnAzure/sapMonitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $v2ApiVersion;
+	$url = $url + $subscriptionParams + $rgParams + $providerParams;
+	[string]$provisiongState = "";
+	$logger.LogInfo("Making Get Provider call with $url");
+    
+	try
+    {
+        $response = Invoke-RestMethod -Method 'get' -Uri $url -Headers $headers;
+		[string]$provisiongState = $response.properties.provisioningState;
+    }
+    catch
+    {
+        $GetProviderErrorMsg = $_.ErrorDetails.ToString();
+		$logger.LogInfo("GetAmsV1ProviderStatus : $($GetProviderErrorMsg)");
+		[string]$provisiongState = "Not Created";
+    }
+	return $provisiongState;
 }
