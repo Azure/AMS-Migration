@@ -81,7 +81,7 @@ function Main
 	}
 
     $logger.LogInfo("Please select an account to connect to Azure Portal...")
-    Connect-AzAccount
+    Connect-AzAccount -UseDeviceAuthentication;
 
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
@@ -91,7 +91,7 @@ function Main
 	$logger.LogInfo("Generating JWT token to access keyvault.");
     $KeyVaultToken = Get-Token("KeyVault")
 
-    #Generate the KeyVault Name
+    # Generate the KeyVault Name
 	$logger.LogInfo("Generating key vault name using ams v1 armid.");
     $keyVaultName = Get-KeyVaultName $amsv1ArmId
 
@@ -102,15 +102,20 @@ function Main
 	$logger.LogInfo("Fetch all the secrets from Key Vault $keyVaultName.");
     $listOfSecrets = Get-AzKeyVaultSecret -VaultName $keyVaultName;
 
+	# Parse Netweaver hosts.json file.
+	$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json" -logger $logger;
+
+
     $saphanaTransformedList = New-Object System.Collections.ArrayList
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
     $unsupportedProviderList = New-Object System.Collections.ArrayList
 
     foreach ($i in $listOfSecrets)
     {
-        if($i.id.Contains('global'))
+		
+        if($i.Name.Contains('global'))
         {
-            continue
+            continue;
         }
 
         $secret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $i.Name -AsPlainText;
@@ -158,8 +163,6 @@ function Main
 			# (To be handled later, once the feature is enabled in ams v2)
             if(!$secret.properties.sapPasswordKeyVaultUrl -and !$secret.properties.sapRfcSdkBlobUrl)
             {
-				$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json" -logger $logger;
-
                 $logger.LogInfoObject("Trying to migrate SapNetWeaver Provider", $secret.name);
 
 				if(!$hashTable.ContainsKey($secret.name))
@@ -338,20 +341,20 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	# call the put provider method.
 	PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
 		
-	# we will check the provisioning status for the provider 15 times in 20 sec intervals.
+	# we will check the provisioning status for the provider 45 times in 20 sec intervals.
 	$checks = 0;
 
 	# default providioning state is accepted, we will keep checking till is changes.
 	$provisioningState = "Accepted";
 		
-	while ($checks -le 30 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
+	while ($checks -le 45 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
 
-		Start-Sleep -s 30
+		Start-Sleep -s 20
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;
 		$checks += 1;
 		$logger.LogInfo("Current Provisioning State : $provisioningState");
-		$logger.LogInfo("Checked the status of Put Provider Call ($checks/30) times");
+		$logger.LogInfo("Checked the status of Put Provider Call ($checks/45) times");
 	}
 
 	if($provisioningState -eq "Succeeded") {
@@ -474,19 +477,19 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	# call the put provider method.
 	PutAmsV2Provider -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -request $requestObj -logger $logger;
 		
-	# we will check the provisioning status for the provider 15 times in 20 sec intervals.
+	# we will check the provisioning status for the provider 45 times in 20 sec intervals.
 	$checks = 0;
 
 	# default providioning state is accepted, we will keep checking till is changes.
 	$provisioningState = "Accepted";
 		
-	while ($checks -le 30 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
-		Start-Sleep -s 30
+	while ($checks -le 45 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
+		Start-Sleep -s 20
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;
 		$checks += 1;
 		$logger.LogInfo("Current Provisioning State : $provisioningState");
-		$logger.LogInfo("Checked the status of Put Provider Call ($checks/30) times");
+		$logger.LogInfo("Checked the status of Put Provider Call ($checks/45) times");
 	}
 
 	if($provisioningState -eq "Succeeded") {

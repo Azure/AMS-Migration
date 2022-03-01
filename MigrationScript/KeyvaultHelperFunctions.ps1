@@ -115,6 +115,7 @@ function DeleteAndPurgeSecretFromKeyVault([string]$keyVaultName, [string]$secret
 		Start-Sleep -s 15
 		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -InRemovedState -PassThru -Force -ErrorAction SilentlyContinue;
 		$logger.LogInfo("Purged Secret $secretKey from Keyvault $keyVaultName");
+		Start-Sleep -s 10
 		return $true;
 	} catch {
 		$deleteerrMsg = $_.exception.message

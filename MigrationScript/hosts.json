@@ -1,10 +1,10 @@
 [
     {
-        "providerName":"suha-nwprovider-2",
-        "sapHostFileEntries": ["172.20.164.196 SAPTSTGTMA1 SAPTSTGTMA1.redmond.corp.microsoft.com","172.20.164.197 SAPTSTGTMCI SAPTSTGTMCI.redmond.corp.microsoft.com","172.20.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"]
+        "providerName":"<Provider-1-Name>",
+        "sapHostFileEntries": ["172.0.0.1 Sample123 Sample123.microsoft.com","172.0.0.1 Sample123 Sample123.microsoft.com"]
     },
-    {
-        "providerName":"suha2",
-        "sapHostFileEntries": ["172.30.164.196 SAPTSTGTMA1 SAPTSTGTMA1.redmond.corp.microsoft.com","172.30.164.197 SAPTSTGTMCI SAPTSTGTMCI.redmond.corp.microsoft.com","172.30.164.203 SAPTSTGTMA2 SAPTSTGTMA2.redmond.corp.microsoft.com"]
+	{
+        "providerName":"<Provider-2-Name>",
+        "sapHostFileEntries": ["172.0.0.1 Sample123 Sample123.microsoft.com","172.0.0.1 Sample123 Sample123.microsoft.com"]
     }
 ]
