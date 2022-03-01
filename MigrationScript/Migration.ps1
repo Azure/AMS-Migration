@@ -109,14 +109,16 @@ function Main
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
     $unsupportedProviderList = New-Object System.Collections.ArrayList
 
-    foreach ($i in $listOfSecrets.value)
+    foreach ($i in $listOfSecrets)
     {
-        if($i.id.Contains('global'))
+		
+        if($i.Name.Contains('global'))
         {
-            continue
+            continue;
         }
 
-        $secret = Get-SecretValue -uri $i.id -keyVaultToken $KeyVaultToken
+        $secret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $i.Name -AsPlainText;
+		$secret = ConvertFrom-Json $secret;
 
         if ($secret.type -like "saphana" -and ($providerType -like "saphana" -or $providerType -like "all"))
         {

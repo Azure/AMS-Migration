@@ -4,7 +4,7 @@
         "sapHostFileEntries": ["172.0.0.1 Sample123 Sample123.microsoft.com","172.0.0.1 Sample123 Sample123.microsoft.com"]
     },
 	{
-        "providerName":"<Provider-1-Name>",
+        "providerName":"<Provider-2-Name>",
         "sapHostFileEntries": ["172.0.0.1 Sample123 Sample123.microsoft.com","172.0.0.1 Sample123 Sample123.microsoft.com"]
     }
 ]
