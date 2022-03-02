@@ -258,21 +258,17 @@ General notes
 #>
 function ParseSapNetWeaverHostfile($fileName, $logger)
 {
-	$logger.LogInfo("Parsing host.json file.");
-    $fileName = "hosts.json"
+	$logger.LogInfo("Parsing host.txt file.");
+    $fileName = "hosts.txt"
 
-    $logFilePath = Join-Path $PSScriptRoot "\$fileName"
+    $logFilePath = Join-Path $PSScriptRoot ".\$fileName"
+    $sapHostFileEntriesList = New-Object System.Collections.ArrayList
 
-    $content = (Get-Content "$logFilePath" | Out-String)
-    $content = ConvertFrom-Json $content
-
-    $hashTable = @{}
-
-    foreach($i in $content)
-    {
-        $logger.LogInfo("Found Provider $($i.providerName)");
-        $logger.LogInfo("with host file entries : $($i.sapHostFileEntries)");
-        $hashTable.add($i.providerName,$i.sapHostFileEntries)
+    foreach($line in Get-Content $logFilePath) {
+        if($line -match $regex){
+           $logger.LogInfo("Found Hostfile entry : $($line)");
+           $sapHostFileEntriesList.Add($line) | Out-Null
+        }
     }
-    return $hashTable
+    return $sapHostFileEntriesList
 }
