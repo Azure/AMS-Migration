@@ -1,11 +1,5 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
-[string]$subscriptionId = "<subscription_id>",
-
-#[Parameter(Mandatory=$true)]
-[string]$tenantId = "<tenant_id>",
-
-#[Parameter(Mandatory=$true)]
 [string]$providerType = $null,
 
 #[Parameter(Mandatory=$true)]
@@ -27,31 +21,13 @@
 
 <#
 .SYNOPSIS
-Function to fetch jwt token for key vault.
-
-.PARAMETER typeToken
-keyvault token.
-
-.EXAMPLE
-Get-Token("KeyVault")
-#>
-function Get-Token([string]$typeToken)
-{
-    $rawToken = Get-AzAccessToken -ResourceTypeName $typeToken;
-    $token = $rawToken.Token;
-    return $token
-}
-
-<#
-.SYNOPSIS
 Main Entry Function for migration.
 #>
 function Main
 {
-    $global:ENABLE_TRACE = $true
     $logger = New-Object ConsoleLogger
 
-	$logger.LogInfo("-----------Setting up Az modules for migration--------------")
+	$logger.LogInfo("-----------Setting up Az modules for migration--------------");
 	# Install the pre-requisite modules
 	InstallModules
 
@@ -63,7 +39,7 @@ function Main
     $logFilePath = Join-Path $PSScriptRoot "\LogFiles\$shortDate\$fileName.txt";
     Start-Transcript -Path $logFilePath
 
-    $logger.LogInfo("-----------Starting migration to AMSv2--------------")
+    $logger.LogInfo("-----------Starting migration to AMSv2--------------");
 
     if($providerType -like $null)
     {
@@ -86,10 +62,7 @@ function Main
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
 
-    Set-CurrentContext $parsedv1ArmId.subscriptionId $tenantId -logger $logger;
-
-	$logger.LogInfo("Generating JWT token to access keyvault.");
-    $KeyVaultToken = Get-Token("KeyVault")
+    Set-CurrentContext -subscriptionId $parsedv1ArmId.subscriptionId -logger $logger;
 
     # Generate the KeyVault Name
 	$logger.LogInfo("Generating key vault name using ams v1 armid.");
@@ -104,7 +77,6 @@ function Main
 
 	# Parse Netweaver hosts.json file.
 	$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json" -logger $logger;
-
 
     $saphanaTransformedList = New-Object System.Collections.ArrayList
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
@@ -223,19 +195,16 @@ function Main
         }
     }
 
-    Stop-Transcript
-
     Get-SapHanaProvidersList $saphanaTransformedList
     Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
     Get-UnsupportedProvidersList $unsupportedProviderList
 
-    Start-Transcript -Append -Path $logFilePath
+    # $logger.LogInfoObject("Migrated AMSv1 SapHana List - ", $saphanaTransformedList)
+    # $logger.LogInfoObject("Migrated AMSv1 SapNeWeaver List - ", $sapNetWeaverTransformedList)
+    # $logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList)
 
-    $logger.LogInfoObject("Migrated AMSv1 SapHana List - ", $saphanaTransformedList)
-    $logger.LogInfoObject("Migrated AMSv1 SapNeWeaver List - ", $sapNetWeaverTransformedList)
-    $logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList)
-
-	$logger.LogInfo("-----------Finishing migration to AMSv2--------------")
+	$logger.LogInfo("----------- Finished migration to AMSv2 --------------");
+	$logger.LogInfo("--------------- Migration Completed ------------------");
     Stop-Transcript
 }
 
@@ -257,7 +226,7 @@ function GetProviderV1ProvisioningState([string]$providerName, $logger) {
 	[string]$subscriptionId = $parsedArmId.subscriptionId;
 	
 	# set context.
-	Set-AzContext -SubscriptionId $subscriptionId -TenantId $tenantId;
+	Set-AzContext -SubscriptionId $subscriptionId;
 	$logger.LogInfo("Checking provisioning state for provider $providerName in AMS v1.");
 	[string]$v1State = GetAmsV1ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $MonitorName -providerName $providerName -logger $logger;
 	$logger.LogInfo("Provisioning State in AMS v1 : $v1State");
@@ -299,7 +268,7 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
 	[string]$subscriptionId = $parsedArmId.subscriptionId;
 	# set context.
-	Set-AzContext -SubscriptionId $subscriptionId -TenantId $tenantId;
+	Set-AzContext -SubscriptionId $subscriptionId;
 
 	$providerProperties = $($secretValue.properties)
 	$requestObj = @{
@@ -326,7 +295,9 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	# if the Provider already exists then proceed with no action.
 	if($provisioningState -eq "Succeeded") {
 		$logger.LogInfo("Provider $providerName already exists..");
-		Continue;
+		return @{
+			provisiongState = $provisioningState
+		};
 	}
 
 	# trying to delete secret
@@ -448,7 +419,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
 	[string]$subscriptionId = $parsedArmId.subscriptionId;
 	# set context.
-	Set-AzContext -SubscriptionId $subscriptionId -TenantId $tenantId;
+	Set-AzContext -SubscriptionId $subscriptionId;
 
 	$providerProperties = $($secretValue.properties)
     $metadata = $($secretValue.metadata)
@@ -462,7 +433,9 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	# if the Provider already exists then proceed with no action.
 	if($provisioningState -eq "Succeeded") {
 		$logger.LogInfo("Provider $providerName already exists..");
-		Continue;
+		return @{
+			provisiongState = $provisioningState
+		};
 	}
 
 	# trying to delete secret

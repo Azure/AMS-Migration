@@ -14,10 +14,10 @@ logger object.
 .EXAMPLE
 Set-CurrentContext -subscriptionId $subscriptionId -tenantId $tenantId -logger $logger
 #>
-function Set-CurrentContext($subscriptionId, $tenantId, $logger)
+function Set-CurrentContext($subscriptionId, $logger)
 {
 	$logger.LogInfo("Setting context for the current user with SubscriptionId $subscriptionId and tenant $tenantId");
-    Get-AzSubscription -SubscriptionId $subscriptionId -TenantId $tenantId | Set-AzContext
+    Get-AzSubscription -SubscriptionId $subscriptionId | Set-AzContext
 }
 
 <#
@@ -55,18 +55,21 @@ List of SAP Netweaver Providers.
 .EXAMPLE
 Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
 #>
-function Get-SapNetWeaverProvidersList($sapNetWeaverTransformedList)
+function Get-SapNetWeaverProvidersList([System.Collections.ArrayList]$sapNetWeaverTransformedList)
 {
+	if($sapNetWeaverTransformedList.Count -eq 0) {
+		return;
+	}
     $width = 25
     Write-Host
     Write-Host
     $logger.LogInfo("Listing migrating SapNetWeaver provider(s)")
     Write-Host
-    Write-Host -ForegroundColor Magenta "     NAME                                         TYPE"
-    Write-Host "|-------------------------------------------------------------------|"
+    Write-Host -ForegroundColor Magenta "     NAME                                         TYPE                        State"
+    Write-Host "|--------------------------------------------------------------------------------------------|";
     foreach ($sapNetWeaverProvider in $sapNetWeaverTransformedList)
     {
-        Write-Host -NoNewline "    " $sapNetWeaverProvider.name
+        Write-Host "    " $sapNetWeaverProvider.name  -NoNewline
         $spaces = $width - $sapNetWeaverProvider.name.Length + 4
         for($i=0; $i -lt $spaces; $i++)
         {
@@ -78,9 +81,18 @@ function Get-SapNetWeaverProvidersList($sapNetWeaverTransformedList)
         {
             Write-Host -NoNewline " "
         }
-        Write-Host $sapNetWeaverProvider.type
+        Write-Host -NoNewline $sapNetWeaverProvider.type
+
+		for($i=0; $i -lt $width - 10; $i++)
+        {
+            Write-Host -NoNewline " "
+        }
+		Write-Host -NoNewline      "|    "
+
+        Write-Host $sapNetWeaverProvider.state;
     }
-    Write-Host "|-------------------------------------------------------------------|"
+    Write-Host "|--------------------------------------------------------------------------------------------|";
+	Write-Host "";
 }
 
 <#
@@ -94,18 +106,21 @@ List of SAP Providers which are not supported currently.
 .EXAMPLE
 Get-UnsupportedProvidersList $unsupportedProviderList
 #>
-function Get-UnsupportedProvidersList($unsupportedProviderList)
+function Get-UnsupportedProvidersList([System.Collections.ArrayList]$unsupportedProviderList)
 {
+	if($unsupportedProviderList.Count -eq 0) {
+		return;
+	}
     $width = 25
     Write-Host
     Write-Host
-    $logger.LogInfo("Listing unsupported provider(s)")
+    $logger.LogInfo("Listing unsupported provider(s)");
     Write-Host
-    Write-Host -ForegroundColor Magenta "     NAME                                         TYPE"
-    Write-Host "|-------------------------------------------------------------------|"
+    Write-Host -ForegroundColor Magenta "     NAME                                         TYPE                        State"
+    Write-Host "|--------------------------------------------------------------------------------------------|";
     foreach ($unsupportedProvider in $unsupportedProviderList)
     {
-        Write-Host -NoNewline "    " $unsupportedProvider.name
+        Write-Host "    " $unsupportedProvider.name  -NoNewline
         $spaces = $width - $unsupportedProvider.name.Length + 4
         for($i=0; $i -lt $spaces; $i++)
         {
@@ -117,9 +132,18 @@ function Get-UnsupportedProvidersList($unsupportedProviderList)
         {
             Write-Host -NoNewline " "
         }
-        Write-Host $unsupportedProvider.type
+        Write-Host -NoNewline $unsupportedProvider.type
+
+		for($i=0; $i -lt $width - 10; $i++)
+        {
+            Write-Host -NoNewline " "
+        }
+		Write-Host -NoNewline      "|    "
+
+        Write-Host $unsupportedProvider.state;
     }
-    Write-Host "|-------------------------------------------------------------------|"
+	Write-Host  "|--------------------------------------------------------------------------------------------|";
+	Write-Host "";
 }
 
 <#
@@ -133,18 +157,22 @@ List of SAP HANA Providers.
 .EXAMPLE
  Get-SapHanaProvidersList $saphanaTransformedList
 #>
-function Get-SapHanaProvidersList($saphanaTransformedList)
+function Get-SapHanaProvidersList([System.Collections.ArrayList]$saphanaTransformedList)
 {
+	if($saphanaTransformedList.Count -eq 0) {
+		return;
+	}
+
     $width = 25
     Write-Host
     Write-Host
     $logger.LogInfo("Listing migrating SapHana provider(s)")
     Write-Host
-    Write-Host -ForegroundColor Magenta "     NAME                                         TYPE"
-    Write-Host "|-------------------------------------------------------------------|"
+    Write-Host -ForegroundColor Magenta "     NAME                                         TYPE                        State"
+    Write-Host "|--------------------------------------------------------------------------------------------|";
     foreach ($saphanaProvider in $saphanaTransformedList)
     {
-        Write-Host -NoNewline "    " $saphanaProvider.name
+        Write-Host "    " $saphanaProvider.name  -NoNewline
         $spaces = $width - $saphanaProvider.name.Length + 4
         for($i=0; $i -lt $spaces; $i++)
         {
@@ -156,9 +184,18 @@ function Get-SapHanaProvidersList($saphanaTransformedList)
         {
             Write-Host -NoNewline " "
         }
-        Write-Host $saphanaProvider.type
+        Write-Host -NoNewline $saphanaProvider.type
+
+		for($i=0; $i -lt $width - 10; $i++)
+        {
+            Write-Host -NoNewline " "
+        }
+		Write-Host -NoNewline      "|    "
+
+        Write-Host $saphanaProvider.state;
     }
-    Write-Host "|-------------------------------------------------------------------|"
+    Write-Host  "|--------------------------------------------------------------------------------------------|";
+	Write-Host "";
 }
 
 # Install module pre-requisites
@@ -176,7 +213,7 @@ function InstallModules()
     }
     catch {
     }
-    if ($m -eq $null)
+    if ($null -eq $m)
     {
         Write-Host -ForegroundColor Green "Installing Az Module."
         Install-Module Az -AllowClobber
@@ -193,7 +230,7 @@ function InstallModules()
     }
     catch {
     }
-    if ($m -eq $null)
+    if ($null -eq $m)
     {
         Write-Host -ForegroundColor Green "Installing AzureAD Module."
         Install-Module AzureAD
