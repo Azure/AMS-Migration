@@ -101,9 +101,10 @@ function Main
     # Fetch all the secrets from KeyVault
 	$logger.LogInfo("Fetch all the secrets from Key Vault $keyVaultName.");
     $listOfSecrets = Get-AzKeyVaultSecret -VaultName $keyVaultName;
-	
+
 	# Parse Netweaver hosts.json file.
 	$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json" -logger $logger;
+
 
     $saphanaTransformedList = New-Object System.Collections.ArrayList
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
@@ -216,6 +217,9 @@ function Main
                 
                 $unsupportedProviderList.Add($request) | Out-Null
             }
+			else {
+				$logger.LogInfo("Cannot parse the secret value.");
+			}
         }
     }
 
