@@ -34,7 +34,7 @@ function Get-ProviderSapSid([string]$providerName, $logger)
 	[string]$dialogContent = "SAP SID property not found for provider $providerName.";
 	Write-Host $dialogContent;
 	while ($sapSid.Length -lt 3) {
-		$sapSid = Read-Host -Prompt "Please enter a 3 letter SAP SID : ";
+		$sapSid = Read-Host -Prompt "Please enter a 3 letter SAP SID ";
 	}
 	$sapSid = $sapSid.ToUpper();
 	$sapSid = $sapSid.Substring(0,3);
