@@ -44,7 +44,7 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 	[string]$providerType = &quot;sapnetweaver&quot;
 	</code></pre>
 
-6. Provider the AMS (classic) resource ARM ID and new AMS resource ARM ID. You can find those by navigating to AMS resource -\&gt; properties -\&gt; Resource ID. Then, execute the following cmds:
+6. Provide the AMS (classic) resource ARM ID and new AMS resource ARM ID. You can find those by navigating to AMS resource -> properties -> Resource ID. Then, execute the following cmds:
 	<pre><code>
 	[string]$amsv1ArmId = &quot;&lt;AMS (classic) ARM ID&gt;&quot;
 	[string]$amsv2ArmId = &quot;&lt;AMS ARM ID&gt;&quot;
