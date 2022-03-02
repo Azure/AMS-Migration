@@ -2,7 +2,7 @@
 
 > Older version of product will be referred to as Azure Monitor for SAP Solutions (classic) or AMS (classic). AMS (classic) is currently in public preview.
 
-> **New** version of the product will be referred to as Azure Monitor for SAP solutions or AMS. AMS is currently in private preview and is subjected to allow-listing of subscription.
+> **The newer** version of the product will be referred to as Azure Monitor for SAP solutions or AMS. AMS is currently in private preview and is subjected to allow-listing of subscription.
 
 Below are steps to migrate AMS (classic) to AMS monitor resource.
 
@@ -76,7 +76,7 @@ After successfully migrating all SAP HANA &amp; SAP NetWeaver providers, navigat
 <span style="color:blue"><i>Please note</i></span>: You can choose to not delete these providers in AMS (classic) resource after successfully migrating these providers – AMS will work just fine. However, you will incur additional costs on log analytics workspace since duplicate data will get pumped into it (from both AMS (classic) and AMS). Therefore, we highly recommend that you delete all successfully migrated providers from AMS (classic) resource.
 
 ## Optional: 
-manually recreate all alert rules for SAP HANA &amp; SAP NetWeaver in new AMS resource.
+Manually recreate all alert rules for SAP HANA &amp; SAP NetWeaver in new AMS resource.
 
 If you have other providers besides SAP HANA &amp; SAP NetWeaver, please check this guide next month. AMS engineering team is planning to support other providers such as High-availability (pacemaker) cluster, SQL Server and OS in coming months.
 
