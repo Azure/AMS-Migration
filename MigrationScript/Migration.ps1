@@ -195,17 +195,30 @@ function Main
         }
     }
 
-    Get-SapHanaProvidersList $saphanaTransformedList
-    Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
-    Get-UnsupportedProvidersList $unsupportedProviderList
+	if ($saphanaTransformedList.Count -gt 0) {
+		$logger.LogInfoObject("Migrated AMSv1 SapHana List - ", $saphanaTransformedList);
+	}
+	
+	if ($sapNetWeaverTransformedList.Count -gt 0) {
+    	$logger.LogInfoObject("Migrated AMSv1 SapNeWeaver List - ", $sapNetWeaverTransformedList);
+	}
 
-    # $logger.LogInfoObject("Migrated AMSv1 SapHana List - ", $saphanaTransformedList)
-    # $logger.LogInfoObject("Migrated AMSv1 SapNeWeaver List - ", $sapNetWeaverTransformedList)
-    # $logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList)
+	if ($unsupportedProviderList.Count -gt 0) {
+    	$logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList);
+	}
 
 	$logger.LogInfo("----------- Finished migration to AMSv2 --------------");
 	$logger.LogInfo("--------------- Migration Completed ------------------");
     Stop-Transcript
+
+	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
+	Write-Host -ForegroundColor Yellow "download \LogFiles\$shortDate\$fileName.txt";
+
+    Get-SapHanaProvidersList $saphanaTransformedList
+    Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
+    Get-UnsupportedProvidersList $unsupportedProviderList
+
+    
 }
 
 <#
