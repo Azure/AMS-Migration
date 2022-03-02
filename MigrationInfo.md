@@ -62,7 +62,8 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 	[string]$amsv2ArmId = &quot;&lt;AMS ARM ID&gt;&quot;	
 	$command = ".\AMS-Migration\src\Migration.ps1 -providerType $providerType -amsv1ArmId $amsv1ArmId -amsv2ArmId $amsv2ArmId";
 	Invoke-Expression $command</code></pre>
-	After the script executes successfully, you will see the following output. (@Mohit to put screenshot)
+	After the script executes successfully, you will see the following output. <br/>
+	![Provider Summary](./src/assets/Summary.png "Provider Summary")
 
 
 ## Optional but HIGHLY Recommended 
