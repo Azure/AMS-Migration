@@ -265,10 +265,8 @@ function ParseSapNetWeaverHostfile($fileName, $logger)
     $sapHostFileEntriesList = New-Object System.Collections.ArrayList
 
     foreach($line in Get-Content $logFilePath) {
-        if($line -match $regex){
-           $logger.LogInfo("Found Hostfile entry : $($line)");
-           $sapHostFileEntriesList.Add($line) | Out-Null
-        }
+		$logger.LogInfo("Found Hostfile entry : $($line)");
+		$sapHostFileEntriesList.Add($line) | Out-Null
     }
     return $sapHostFileEntriesList
 }
