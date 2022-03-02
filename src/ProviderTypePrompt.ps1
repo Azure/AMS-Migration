@@ -41,7 +41,3 @@ function Get-ProviderSapSid([string]$providerName, $logger)
     $logger.LogInfo("For provider $providerName, User entered SAP SID : $($sapSid)");
     return $sapSid;
 }
-
-. $PSScriptRoot\ConsoleLogger.ps1
-$logger = New-Object ConsoleLogger
-Get-ProviderSapSid "abs" $logger
