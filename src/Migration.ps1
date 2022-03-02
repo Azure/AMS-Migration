@@ -75,12 +75,14 @@ function Main
 	$logger.LogInfo("Fetch all the secrets from Key Vault $keyVaultName.");
     $listOfSecrets = Get-AzKeyVaultSecret -VaultName $keyVaultName;
 
-	# Parse Netweaver hosts.json file.
-	$hashTable = ParseSapNetWeaverHostfile -fileName "hosts.json" -logger $logger;
+	# Parse Netweaver hosts.txt file.
+	$sapHostFileEntriesList = ParseSapNetWeaverHostfile -fileName "hosts.txt" -logger $logger;
 
     $saphanaTransformedList = New-Object System.Collections.ArrayList
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
     $unsupportedProviderList = New-Object System.Collections.ArrayList
+	$emptyNwList = New-Object System.Collections.ArrayList
+	$isFirstNwProvider = $false
 
     foreach ($i in $listOfSecrets)
     {
@@ -136,12 +138,6 @@ function Main
             if(!$secret.properties.sapPasswordKeyVaultUrl -and !$secret.properties.sapRfcSdkBlobUrl)
             {
                 $logger.LogInfoObject("Trying to migrate SapNetWeaver Provider", $secret.name);
-
-				if(!$hashTable.ContainsKey($secret.name))
-				{
-					$hashTable.Add($secret.name, @());
-					$logger.LogInfo("Provider $($secret.name) not found in hosts file. Setting empty hostfile entry[]");
-				}
 				
 				$sid = $secret.metadata.sapSid.ToString();
 				if(($sid.Length) -eq 0) {
@@ -150,8 +146,17 @@ function Main
 					$secret.metadata.sapSid = $sid;
 				}
 				
-				$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $hashTable[$secret.name] -logger $logger
-
+				if($isFirstNwProvider)
+				{
+					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as empty for $($secret.name)");
+					$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $sapHostFileEntriesList -logger $logger
+				}
+				else 
+				{
+					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as non-empty for $($secret.name)");
+					$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $emptyNwList -logger $logger
+				}
+				
 				$requestNet = @{
                     name = $secret.name
                     type = $secret.type
@@ -159,6 +164,7 @@ function Main
                 }
 
 				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
+					$isFirstNwProvider = $true;
                     $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $requestNet)
 				}
 
@@ -210,6 +216,10 @@ function Main
 	$logger.LogInfo("----------- Finished migration to AMSv2 --------------");
 	$logger.LogInfo("--------------- Migration Completed ------------------");
     Stop-Transcript
+
+    Get-SapHanaProvidersList $saphanaTransformedList
+    Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
+    Get-UnsupportedProvidersList $unsupportedProviderList
 
 	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
 	Write-Host -ForegroundColor Yellow "download \LogFiles\$shortDate\$fileName.txt";
@@ -450,7 +460,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	[string]$managedKvName = GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
 	[string]$funcName = GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerType $providerType -logger $logger;
 	if(($funcName -ne "") -and ($managedKvName -ne "")) {
-		[string]$managedSecretName = "saphana-provider-" + $funcName + "-instance-" + $providerName;
+		[string]$managedSecretName = "sapnetweaver-provider-" + $funcName + "-instance-" + $providerName;
 		DeleteAndPurgeSecretFromKeyVault -keyVaultName $managedKvName -secretKey $managedSecretName -logger $logger;
 	}
 

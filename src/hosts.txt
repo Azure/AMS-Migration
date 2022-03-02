@@ -1,0 +1,2 @@
+172.X.X.X sapservername sapservername.contoso.com
+172.X.X.X sapservername2 sapservername2.contoso.com
