@@ -26,16 +26,15 @@
 
 function Get-ProviderSapSid([string]$providerName, $logger)
 {
-    Add-Type -AssemblyName PresentationCore,PresentationFramework
+    # Add-Type -AssemblyName PresentationCore,PresentationFramework
     # $MessageIcon = [System.Windows.MessageBoxImage]::Warning
-    [void][Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
+    # [void][Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
  
 	[string]$sapSid = "";
+	[string]$dialogContent = "SAP SID property not found for provider $providerName.";
+	Write-Host $dialogContent;
 	while ($sapSid.Length -lt 3) {
-		[string]$messageTitle = 'Enter SAP SID'
-		[string]$dialogContent = "SAP SID property not found for provider $providerName." + "`n`n" +
-		"Please enter a 3 letter SAP SID for provider $providerName"
-		$sapSid = [Microsoft.VisualBasic.Interaction]::InputBox($dialogContent, $messageTitle);
+		$sapSid = Read-Host -Prompt "Please enter a 3 letter SAP SID : ";
 	}
 	$sapSid = $sapSid.ToUpper();
 	$sapSid = $sapSid.Substring(0,3);
@@ -43,3 +42,6 @@ function Get-ProviderSapSid([string]$providerName, $logger)
     return $sapSid;
 }
 
+. $PSScriptRoot\ConsoleLogger.ps1
+$logger = New-Object ConsoleLogger
+Get-ProviderSapSid "abs" $logger
