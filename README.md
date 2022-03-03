@@ -24,6 +24,7 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 	5. Finally, navigate to /etc/hosts file to find the config for SapNetWeaver provider(s). Run the follwoing command from within the CollectorVm to get to the hosts file.
 
 		> sudo nano /etc/hosts
+	6. You can copy the contents of SapNetWeaver config and paste them in **hosts.txt** file in the /src folder for SapNetWeaver migration.
 
 ## Migration steps
 > Continue running AMS (Azure Monitor for SAP Solutions) 1.0 as is.<br/>Assuming you have completed the pre-requisite you should have a successfully deployed AMS, follow the cmds below to automatically migrate all your SAP HANA &amp; SAP NetWeaver providers.
