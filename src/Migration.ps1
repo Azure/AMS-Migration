@@ -82,7 +82,7 @@ function Main
     $sapNetWeaverTransformedList = New-Object System.Collections.ArrayList
     $unsupportedProviderList = New-Object System.Collections.ArrayList
 	$emptyNwList = New-Object System.Collections.ArrayList
-	$isFirstNwProvider = $false
+	$isFirstNwProvider = $true
 
     foreach ($i in $listOfSecrets)
     {
@@ -146,14 +146,15 @@ function Main
 					$secret.metadata.sapSid = $sid;
 				}
 				
-				if($isFirstNwProvider)
+				if($isFirstNwProvider -eq $true)
 				{
-					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as empty for $($secret.name)");
+					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as non-empty for $($secret.name)");
+					$logger.LogInfo("Setting SapHostFiles as $($sapHostFileEntriesList)");
 					$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $sapHostFileEntriesList -logger $logger
 				}
 				else 
 				{
-					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as non-empty for $($secret.name)");
+					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as empty for $($secret.name)");
 					$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $emptyNwList -logger $logger
 				}
 				
