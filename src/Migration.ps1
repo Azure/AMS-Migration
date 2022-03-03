@@ -197,7 +197,7 @@ function Main
                 $unsupportedProviderList.Add($request) | Out-Null
             }
 			else {
-				$logger.LogInfo("Cannot parse the secret value.");
+				$logger.LogInfo("Provider $($secret.name) is Excluded from Current Migration Run, Provider Type is $($secret.type), ProviderType Param is $providerType");
 			}
         }
     }
