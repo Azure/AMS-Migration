@@ -165,7 +165,7 @@ function Main
                 }
 
 				if($netweaverMigrationResult.provisiongState -eq "Succeeded"){
-					$isFirstNwProvider = $true;
+					$isFirstNwProvider = $false;
                     $logger.LogInfoObject("Adding the following transformed SapNetweaver object to migration list", $requestNet)
 				}
 
