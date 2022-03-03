@@ -20,8 +20,8 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 2. Clone migration GitHub repository <br> <pre><code>git clone <a href="https://github.com/Azure/AMS-Migration.git">https://github.com/Azure/AMS-Migration.git</a></code></pre>
 3. Set context of migration by providing your subscription ID and Tenant ID.
 	<pre><code>
-	[string]$subscriptionId = &quot;\&lt;subscription ID\&gt;&quot;
-	[string]$tenantId = &quot;\&lt;Tenant ID\&gt;&quot; 
+	[string]$subscriptionId = &quot;&lt;subscription ID&gt;&quot;
+	[string]$tenantId = &quot;&lt;Tenant ID&gt;&quot; 
 	Set-AzContext -Subscription $subscriptionId -Tenant $tenantId;
 	</code></pre>
 	You can find your subscription ID by navigating to your AMS (classic) resource -> overview page.
