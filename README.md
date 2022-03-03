@@ -78,13 +78,15 @@ After successfully migrating all SAP HANA &amp; SAP NetWeaver providers, navigat
 ## Optional: 
 Manually recreate all alert rules for SAP HANA &amp; SAP NetWeaver in new AMS resource.
 
-If you have other providers besides SAP HANA &amp; SAP NetWeaver, please check this guide next month. AMS engineering team is planning to support other providers such as High-availability (pacemaker) cluster, SQL Server and OS in coming months.
-
+## Important:
 > Please DO NOT DELETE AMS (classic) resource even after successfully migrating all providers.
 
 > Please DO NOT DELETE AMS (classic) managed resource group even after successfully migrating all providers.
 
 For data continuity purpose, if you are reusing the log analytics workspace from AMS (classic) for AMS, deleting either AMS (classic) resource or managed resource group will lead to deletion of log analytics workspace. Unfortunately, that would lead to losing all previously collected telemetry from AMS (classic) and halt new telemetry collection from AMS.
+
+## Upcoming changes: 
+If you have other providers besides SAP HANA &amp; SAP NetWeaver, please check this guide next month. AMS engineering team is planning to support other providers such as High-availability (pacemaker) cluster, SQL Server and OS in coming months.
 
 ## Support
 
