@@ -222,8 +222,10 @@ function Main
     Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
     Get-UnsupportedProvidersList $unsupportedProviderList
 
+	$logFolderPath = Join-Path $PSScriptRoot "\LogFiles\$shortDate"
 	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
-	Write-Host -ForegroundColor Yellow "download \LogFiles\$shortDate\$fileName.txt";
+	Write-Host -ForegroundColor Yellow $logFolderPath;
+	Write-Host -ForegroundColor Yellow "download $fileName.txt";
 }
 
 <#
