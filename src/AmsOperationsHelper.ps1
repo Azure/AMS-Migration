@@ -220,15 +220,11 @@ logger object.
 $logger = New-Object ConsoleLogger
 GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
 #>
-function GetAmsV2ManagedKv([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $logger)
+function GetAmsV2ManagedKv([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, [string]$managedRgName, $logger)
 {    
 	[string]$managedKvName = "";
 	try
     {
-        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
-		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
-		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
-
 		$kvDetails = Get-AzResource -ResourceGroupName $managedRgName -ResourceType Microsoft.KeyVault/vaults
 		$logger.LogInfo("Managed KV Name associated with Monitor : $monitorName is $($kvDetails.Name)");
 		$managedKvName = $kvDetails.Name;
@@ -266,15 +262,11 @@ logger object.
 $logger = New-Object ConsoleLogger
 GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
 #>
-function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, [string]$providerType, $logger)
+function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, [string]$providerType, [string]$managedRgName, $logger)
 {    
 	[string]$managedFuncName = "";
 	try
     {
-        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
-		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
-		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
-
 		$funcDetails = Get-AzResource -ResourceGroupName $managedRgName -Name "$providerType*" -ResourceType Microsoft.Web/sites
 		$logger.LogInfo("Function app for Provider $providerName with Monitor : $monitorName is $($funcDetails.Name)");
 		$managedFuncName = $funcDetails.Name;

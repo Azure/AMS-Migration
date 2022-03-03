@@ -84,7 +84,8 @@ function Main
 	$emptyNwList = New-Object System.Collections.ArrayList
 	$isFirstNwProvider = $true
 
-    foreach ($i in $listOfSecrets)
+	$SecretsList = New-Object System.Collections.ArrayList;
+	foreach ($i in $listOfSecrets)
     {
 		
         if($i.Name.Contains('global'))
@@ -95,6 +96,44 @@ function Main
         $secret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $i.Name -AsPlainText;
 		$secret = ConvertFrom-Json $secret;
 
+		$kvPair = @{
+			Name = $i.Name
+			secret = $secret
+		};
+		$SecretsList.Add($kvPair) | Out-Null;
+	}
+
+
+	# set context in AMS v2 Monitor's Subscription.
+	$parsedArmId = Get-ParsedArmId $amsv2ArmId
+	[string]$monitorName = $parsedArmId.amsResourceName;
+	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
+	[string]$subscriptionId = $parsedArmId.subscriptionId;
+	# set context.
+	Set-AzContext -SubscriptionId $subscriptionId;
+
+	# Get AMS v2 Managed Resource Group Name.
+	$response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
+	$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
+	$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
+
+	# Get values for managed keyvault name and function name.
+	[string]$managedKvName = GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -managedRgName $managedRgName -logger $logger;
+	[string]$HanafuncName = GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerType "saphana" -managedRgName $managedRgName -logger $logger;
+	[string]$NetWeaverfuncName = GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerType "sapnetweaver" -managedRgName $managedRgName -logger $logger;
+    
+	Add-KeyVaultRoleAssignment -keyVaultName $managedKvName -logger $logger;
+
+	foreach ($pair in $SecretsList)
+    {
+		
+        if($pair.Name.Contains('global'))
+        {
+            continue;
+        }
+
+		$secret = $pair.secret;
+
         if ($secret.type -like "saphana" -and ($providerType -like "saphana" -or $providerType -like "all"))
         {
 			# if the hana provider is using key vault to fetch user credentials, skip the migration. 
@@ -102,7 +141,7 @@ function Main
 			if(!$secret.properties.hanaDbPasswordKeyVaultUrl)
 			{                  
 				$logger.LogInfoObject("Trying to migrate SapHana Provider", $secret.name);
-				$hanaMigrationResult = MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
+				$hanaMigrationResult = MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger -funcName $HanafuncName
 
 				$requestHana = @{
 					name = $secret.name
@@ -150,7 +189,7 @@ function Main
 				{
 					$logger.LogInfo("Setting SapNetWeaver Provider hostfile entry as non-empty for $($secret.name)");
 					$logger.LogInfo("Setting SapHostFiles as $($sapHostFileEntriesList)");
-					$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $sapHostFileEntriesList -logger $logger
+					$netweaverMigrationResult = MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -hostfile $sapHostFileEntriesList -logger $logger -funcName $NetWeaverfuncName
 				}
 				else 
 				{
@@ -267,7 +306,7 @@ logger object.
 .EXAMPLE
 MigrateHanaProvider -secretName $secret.name -secretValue $secret -logger $logger
 #>
-function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
+function MigrateHanaProvider([string]$secretName, $secretValue, $logger, [string]$funcName) {
 	
 	[string]$providerType = $($secretValue.type);
 	[string]$providerName = $($secretValue.name);
@@ -279,14 +318,6 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 			provisiongState = "Skipped"
 		}
 	}
-
-	$parsedArmId = Get-ParsedArmId $amsv2ArmId
-
-	[string]$monitorName = $parsedArmId.amsResourceName;
-	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
-	[string]$subscriptionId = $parsedArmId.subscriptionId;
-	# set context.
-	Set-AzContext -SubscriptionId $subscriptionId;
 
 	$providerProperties = $($secretValue.properties)
 	$requestObj = @{
@@ -320,8 +351,6 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 
 	# trying to delete secret
 	# this step is to take care of deleted Successful providers and Failed providers with secret not purged.
-	[string]$managedKvName = GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
-	[string]$funcName = GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerType $providerType -logger $logger;
 	if($funcName.Length -gt 0 -and $managedKvName.Length -gt 0) {
 		[string]$managedSecretName = "saphana-provider-" + $funcName + "-instance-" + $providerName;
 		DeleteAndPurgeSecretFromKeyVault -keyVaultName $managedKvName -secretKey $managedSecretName -logger $logger;
@@ -419,7 +448,7 @@ logger object.
 .EXAMPLE
 MigrateNetWeaverProvider -secretName $secret.name -secretValue $secret -logger $logger
 #>
-function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, $logger) {
+function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, $logger, [string]$funcName) {
 	
 	[string]$providerType = $($secretValue.type);
 	[string]$providerName = $($secretValue.name);
@@ -431,13 +460,6 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 			provisiongState = "Skipped"
 		}
 	}
-	$parsedArmId = Get-ParsedArmId $amsv2ArmId
-
-	[string]$monitorName = $parsedArmId.amsResourceName;
-	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
-	[string]$subscriptionId = $parsedArmId.subscriptionId;
-	# set context.
-	Set-AzContext -SubscriptionId $subscriptionId;
 
 	$providerProperties = $($secretValue.properties)
     $metadata = $($secretValue.metadata)
@@ -458,8 +480,6 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 
 	# trying to delete secret
 	# this step is to take care of deleted Successful providers and Failed providers with secret not purged.
-	[string]$managedKvName = GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
-	[string]$funcName = GetAmsV2ManagedFunc -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerType $providerType -logger $logger;
 	if(($funcName -ne "") -and ($managedKvName -ne "")) {
 		[string]$managedSecretName = "sapnetweaver-provider-" + $funcName + "-instance-" + $providerName;
 		DeleteAndPurgeSecretFromKeyVault -keyVaultName $managedKvName -secretKey $managedSecretName -logger $logger;
