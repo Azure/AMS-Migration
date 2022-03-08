@@ -26,13 +26,13 @@ function GetAlerts([string]$SubscriptionId, [string]$ResourceGroupName, $logger)
         "Authorization" = "Bearer $armToken"
     }
 
-	[string]$apiVersion = "2021-08-01";
+	[string]$apiVersion = "2018-04-16";
 	[string]$url = "https://management.azure.com/";
 	[string]$subscriptionParams = "subscriptions/" + $SubscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $ResourceGroupName;
 	[string]$providerParams = "/providers/Microsoft.Insights/scheduledQueryRules?api-version=$apiVersion";
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
-
+	$logger.LogInfo($url);
 	try
     {
         $response = Invoke-RestMethod -Method 'get' -Uri $url -Headers $headers;
@@ -72,7 +72,7 @@ logger object.
 .EXAMPLE
 An example
 #>
-function PutAlert([string]$subscriptionId, [string]$resourceGroup, [string]$alertName, $request, $logger) {
+function PutAlert([string]$subscriptionId, [string]$ResourceGroupName, [string]$alertName, $request, $logger) {
 	$rawToken = Get-AzAccessToken -ResourceTypeName Arm;
     $armToken = $rawToken.Token;
 
@@ -81,14 +81,14 @@ function PutAlert([string]$subscriptionId, [string]$resourceGroup, [string]$aler
         "Authorization" = "Bearer $armToken"
     };
 
-    $bodyStr = $request.body | ConvertTo-Json -Depth 5;
-	[string]$apiVersion = "2021-08-01";
+    $bodyStr = $request | ConvertTo-Json -Depth 10;
+    $bodyStr = $bodyStr.Replace("\u0027", "'");
+    # Write-Host $bodyStr;
+	[string]$apiVersion = "2018-04-16";
 	[string]$url = "https://management.azure.com/";
 	[string]$subscriptionParams = "subscriptions/" + $SubscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $ResourceGroupName;
-	[string]$providerParams = "/providers/Microsoft.Insights/scheduledQueryRules/$alertName?api-version=$apiVersion";
-	$url = $url + $subscriptionParams + $rgParams + $providerParams;
-
+	[string]$providerParams = "/providers/Microsoft.Insights/scheduledQueryRules/" + $alertName + "?api-version=" + $apiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 
 	$logger.LogInfo("Making Put Alert call with $url")
@@ -105,5 +105,30 @@ function PutAlert([string]$subscriptionId, [string]$resourceGroup, [string]$aler
 	return @{
 		Response = $response
 		Error = $putAlertErrorMsg
+	}
+}
+
+function MigrateLawsAlerts($LawsDetails, $logger) {
+    $amsv1LawsDetails = Get-ParsedArmId($LawsDetails.amsv1LawsId);
+    $amsv2LawsDetails = Get-ParsedArmId($LawsDetails.amsv2LawsId);
+
+    $response = GetAlerts -SubscriptionId $amsv1LawsDetails.subscriptionId -ResourceGroupName $amsv1LawsDetails.amsResourceGroup -logger $logger;
+    $alertsArray = $response.Response.value;
+    if($alertsArray.Count -ne 0) {
+        foreach($alert1 in $alertsArray) {
+            [string]$alertName = $($alert1.name);
+            $alert1.properties.source.dataSourceId = $LawsDetails.amsv2LawsId;
+			$alert1.id = $LawsDetails.amsv2LawsId;
+			# $alert1.properties.scopes = $newScope;
+            # $alert1.properties.displayName = $alertName;
+            # if($alert1.properties.muteActionsDuration -eq "PT0S") {
+            #     $alert1.properties.muteActionsDuration = $alert1.properties.evaluationFrequency;
+            # }
+            # $alert1.properties | Add-Member -NotePropertyName WindowSize -NotePropertyValue $alert1.properties.evaluationFrequency -ErrorAction SilentlyContinue;
+            PutAlert -subscriptionId $amsv2LawsDetails.subscriptionId -resourceGroup $amsv2LawsDetails.amsResourceGroup -alertName $alertName -request $alert1 -logger $logger;
+        }
+    }
+	else {
+		$logger.LogInfo("No alerts found inside ams v1 resource.");
 	}
 }
