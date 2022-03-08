@@ -1,12 +1,12 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
-[string]$providerType = $null,
+[string]$providerType = "saphana",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "<amsv1-arm-id>",
+[string]$amsv1ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.HanaOnAzure/sapMonitors/ams-v1-migration-hana",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv2ArmId = "<amsv2-arm-id>"
+[string]$amsv2ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/suha-0802-rg1/providers/Microsoft.Workloads/monitors/migrationv2-0303-ams1"
 )
 
 # ########### Header ###########
@@ -57,7 +57,7 @@ function Main
 	}
 
     $logger.LogInfo("Please select an account to connect to Azure Portal...")
-    Connect-AzAccount -UseDeviceAuthentication;
+    #Connect-AzAccount -UseDeviceAuthentication;
 
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
@@ -84,7 +84,7 @@ function Main
 	$emptyNwList = New-Object System.Collections.ArrayList
 	$isFirstNwProvider = $true
 
-    foreach ($i in $listOfSecrets)
+    <#foreach ($i in $listOfSecrets)
     {
 		
         if($i.Name.Contains('global'))
@@ -220,12 +220,71 @@ function Main
 
     Get-SapHanaProvidersList $saphanaTransformedList
     Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
-    Get-UnsupportedProvidersList $unsupportedProviderList
+    Get-UnsupportedProvidersList $unsupportedProviderList#>
+
+	$compareLaws = Get-CompareLaws -amsv1ArmId $amsv1ArmId -amsv2ArmId $amsv2ArmId -logger $logger
+	$isMigrateAlerts = "";
+
+	if($compareLaws.isEqual)
+	{
+		$logger.LogInfo("AMSv1 and AMSv2 LAWS - $($compareLaws.amsv2LawsId) are equal..");
+	}
+	else 
+	{
+		$logger.LogInfo("AMSv1 $($compareLaws.amsv1LawsId) and AMSv2 $($compareLaws.amsv2LawsId) LAWS are NOT equal..");
+		[string]$dialogContent = "Please select an action for Alert Migration.";
+		Write-Host $dialogContent;
+		while (($isMigrateAlerts -ne "yes") -and ($isMigrateAlerts -ne "no")) {
+			$isMigrateAlerts = Read-Host -Prompt "Do you wish to Migrate Alerts?";
+		}
+	}
 
 	$logFolderPath = Join-Path $PSScriptRoot "\LogFiles\$shortDate"
 	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
 	Write-Host -ForegroundColor Yellow $logFolderPath;
 	Write-Host -ForegroundColor Yellow "download $fileName.txt";
+}
+
+<#
+.SYNOPSIS
+Function to check if AMSv1 LAWS is same as AMSv2.
+
+.PARAMETER amsv1ArmId
+AMSv1 ARM id 
+
+.PARAMETER amsv2ArmId
+AMSv2 ARM id
+
+.EXAMPLE
+GetProviderV1ProvisioningState -amsv1ArmId $amsv1ArmId -amsv2ArmId $amsv2ArmId;
+#>
+function Get-CompareLaws([string]$amsv1ArmId, [string]$amsv2ArmId, $logger)
+{
+	$logger.LogInfo("Comapring AMSv1 and AMSv2 LAWS..");
+	$parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
+	$parsedv2ArmId = Get-ParsedArmId $amsv2ArmId
+
+	[string]$amsv1LawsId = GetAmsV1LawsArmId -subscriptionId $parsedv1ArmId.subscriptionId -resourceGroup $parsedv1ArmId.amsResourceGroup -monitorName $parsedv1ArmId.amsResourceName -logger $logger;
+	[string]$amsv2LawsId = GetAmsV2LawsArmId -subscriptionId $parsedv2ArmId.subscriptionId -resourceGroup $parsedv2ArmId.amsResourceGroup -monitorName $parsedv2ArmId.amsResourceName -logger $logger;
+
+	if($amsv1LawsId -eq $amsv2LawsId)
+	{
+		$laws = @{
+			isEqual = $true
+			amsv1LawsId = $amsv1LawsId
+			amsv2LawsId = $amsv2LawsId
+		}
+		return $laws;
+	}
+	else
+	{
+		$laws = @{
+			isEqual = $false
+			amsv1LawsId = $amsv1LawsId
+			amsv2LawsId = $amsv2LawsId
+		}
+		return $laws;
+	}
 }
 
 <#

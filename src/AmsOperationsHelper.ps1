@@ -142,6 +142,59 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
 
 <#
 .SYNOPSIS
+Function to get the AMSv2 LAWS Arm ID.
+
+.PARAMETER subscriptionId
+SubscriptionId of the AMS v2 Monitor.
+
+.PARAMETER resourceGroup
+Resource Group Name of the AMS v2 Monitor.
+
+.PARAMETER monitorName
+AMS v2 Monitor Name.
+
+.PARAMETER logger
+logger object. 
+
+.EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
+$logger = New-Object ConsoleLogger
+GetAmsV2LawsArmId -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
+#>
+function GetAmsV2LawsArmId([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $logger)
+{
+    $rawToken = Get-AzAccessToken -ResourceTypeName Arm
+    $armToken = $rawToken.Token
+	$v2ApiVersion = "2021-12-01-preview";
+
+    $headers = @{
+        "Content-Type" = "application/json"
+        "Authorization" = "Bearer $armToken"
+    }
+
+    [string]$url = "https://management.azure.com/";
+	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
+	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
+	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "?api-version=" + $v2ApiVersion;
+	$url = $url + $subscriptionParams + $rgParams + $providerParams;
+	$logger.LogInfo("Making Get Provider call with $url")
+    
+	try
+    {
+        $response = Invoke-RestMethod -Method 'get' -Uri $url -Headers $headers;
+		$lawsArmId = $response.properties.logAnalyticsWorkspaceArmId
+    }
+    catch
+    {
+        $GetProviderErrorMsg = $_.ErrorDetails.ToString();
+		$logger.LogInfo("GetAmsV2ProviderStatus : $($GetProviderErrorMsg)");
+    }
+
+	return $lawsArmId;
+}
+
+<#
+.SYNOPSIS
 Function to get the AMS v2 Monitor Properties.
 
 .PARAMETER subscriptionId
@@ -288,6 +341,57 @@ function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [s
 	return $managedFuncName;
 }
 
+<#
+.SYNOPSIS
+Function to get the AMSv1 LAWS Arm ID.
+
+.PARAMETER subscriptionId
+SubscriptionId of the AMS v1 Monitor.
+
+.PARAMETER resourceGroup
+Resource Group Name of the AMS v1 Monitor.
+
+.PARAMETER monitorName
+AMS v1 Monitor Name.
+
+.PARAMETER logger
+logger object. 
+
+.EXAMPLE
+. $PSScriptRoot\ConsoleLogger.ps1
+$logger = New-Object ConsoleLogger
+GetAmsV1LawsArmId -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger;
+#>
+function GetAmsV1LawsArmId([string]$subscriptionId, [string]$resourceGroup, [string]$monitorName, $logger)
+{
+    $rawToken = Get-AzAccessToken -ResourceTypeName Arm
+    $armToken = $rawToken.Token
+	$v2ApiVersion = "2020-02-07-preview";
+
+    $headers = @{
+        "Content-Type" = "application/json"
+        "Authorization" = "Bearer $armToken"
+    }
+
+    [string]$url = $url = "https://management.azure.com/"
+	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
+	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
+	[string]$providerParams = "/providers/Microsoft.HanaOnAzure/sapMonitors/" + $monitorName + "?api-version=" + $v2ApiVersion;
+	$url = $url + $subscriptionParams + $rgParams + $providerParams;
+	$logger.LogInfo("Making Get Provider call with $url");
+    
+	try
+    {
+        $response = Invoke-RestMethod -Method 'get' -Uri $url -Headers $headers;
+		[string]$lawsArmId = $response.properties.logAnalyticsWorkspaceArmId;
+    }
+    catch
+    {
+        $GetProviderErrorMsg = $_.ErrorDetails.ToString();
+		$logger.LogInfo("GetAmsV1ProviderStatus : $($GetProviderErrorMsg)");
+    }
+	return $lawsArmId;
+}
 
 <#
 .SYNOPSIS
