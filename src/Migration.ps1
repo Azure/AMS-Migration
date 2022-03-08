@@ -228,14 +228,6 @@ function Main
     	$logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList);
 	}
 
-	$logger.LogInfo("----------- Finished migration to AMSv2 --------------");
-	$logger.LogInfo("--------------- Migration Completed ------------------");
-    Stop-Transcript
-
-    Get-SapHanaProvidersList $saphanaTransformedList
-    Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
-    Get-UnsupportedProvidersList $unsupportedProviderList
-
 	$compareLaws = Get-CompareLaws -amsv1ArmId $amsv1ArmId -amsv2ArmId $amsv2ArmId -logger $logger
 	$isMigrateAlerts = "";
 
@@ -249,11 +241,11 @@ function Main
 		[string]$dialogContent = "Please select an action for Alert Migration.";
 		Write-Host $dialogContent;
 		while (($isMigrateAlerts -ne "yes") -and ($isMigrateAlerts -ne "no")) {
-			$isMigrateAlerts = Read-Host -Prompt "Do you wish to Migrate Alerts? (Y/N)";
+			$isMigrateAlerts = Read-Host -Prompt "Do you wish to Migrate Alerts? (yes/no)";
 		}
 	}
 
-	if($isMigrateAlerts -like "Y") {
+	if($isMigrateAlerts -like "yes") {
 		MigrateLAWSAlerts -LawsDetails $compareLaws -logger $logger;
 	}
 
@@ -261,6 +253,14 @@ function Main
 	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
 	Write-Host -ForegroundColor Yellow $logFolderPath;
 	Write-Host -ForegroundColor Yellow "download $fileName.txt";
+
+	$logger.LogInfo("----------- Finished migration to AMSv2 --------------");
+	$logger.LogInfo("--------------- Migration Completed ------------------");
+    Stop-Transcript
+
+    Get-SapHanaProvidersList $saphanaTransformedList
+    Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
+    Get-UnsupportedProvidersList $unsupportedProviderList
 }
 
 <#
