@@ -108,7 +108,7 @@ function PutAlert([string]$subscriptionId, [string]$ResourceGroupName, [string]$
 	}
 }
 
-function MigrateLawsAlerts($LawsDetails, $logger) {
+function MigrateLawsAlerts($LawsDetails, $providerType, $logger) {
     $amsv1LawsDetails = Get-ParsedArmId($LawsDetails.amsv1LawsId);
     $amsv2LawsDetails = Get-ParsedArmId($LawsDetails.amsv2LawsId);
 
@@ -119,13 +119,25 @@ function MigrateLawsAlerts($LawsDetails, $logger) {
             [string]$alertName = $($alert1.name);
             $alert1.properties.source.dataSourceId = $LawsDetails.amsv2LawsId;
 			$alert1.id = $LawsDetails.amsv2LawsId;
-			# $alert1.properties.scopes = $newScope;
-            # $alert1.properties.displayName = $alertName;
-            # if($alert1.properties.muteActionsDuration -eq "PT0S") {
-            #     $alert1.properties.muteActionsDuration = $alert1.properties.evaluationFrequency;
-            # }
-            # $alert1.properties | Add-Member -NotePropertyName WindowSize -NotePropertyValue $alert1.properties.evaluationFrequency -ErrorAction SilentlyContinue;
-            PutAlert -subscriptionId $amsv2LawsDetails.subscriptionId -resourceGroup $amsv2LawsDetails.amsResourceGroup -alertName $alertName -request $alert1 -logger $logger;
+
+            if($providerType -like "all")
+            {
+                PutAlert -subscriptionId $amsv2LawsDetails.subscriptionId -resourceGroup $amsv2LawsDetails.amsResourceGroup -alertName $alertName -request $alert1 -logger $logger;
+            }
+            elseif(($providerType -like "saphana") -and ($alert1.tags.'alert-template-id'.Contains("saphana")))
+            {
+                PutAlert -subscriptionId $amsv2LawsDetails.subscriptionId -resourceGroup $amsv2LawsDetails.amsResourceGroup -alertName $alertName -request $alert1 -logger $logger;
+                $logger.LogInfo("Migrating SapHana Alert - $($alertName))");
+            }
+            elseif(($providerType -like "sapnetweaver") -and ($alert1.tags.'alert-template-id'.Contains("sapnetweaver")))
+            {
+                PutAlert -subscriptionId $amsv2LawsDetails.subscriptionId -resourceGroup $amsv2LawsDetails.amsResourceGroup -alertName $alertName -request $alert1 -logger $logger;
+                $logger.LogInfo("Migrating SapNetWeaver Alert - $($alertName))");
+            }
+            else
+            {
+                $logger.LogInfo("Unsupported Alert Migration for - $($alertName))");
+            }
         }
     }
 	else {

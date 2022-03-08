@@ -246,7 +246,7 @@ function Main
 	}
 
 	if($isMigrateAlerts -like "yes") {
-		MigrateLAWSAlerts -LawsDetails $compareLaws -logger $logger;
+		MigrateLAWSAlerts -LawsDetails $compareLaws -providerType $providerType -logger $logger;
 	}
 
 	$logFolderPath = Join-Path $PSScriptRoot "\LogFiles\$shortDate"
