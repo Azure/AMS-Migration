@@ -187,7 +187,7 @@ function GetAmsV2LawsArmId([string]$subscriptionId, [string]$resourceGroup, [str
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogInfo("GetAmsV2ProviderStatus : $($GetProviderErrorMsg)");
+		$logger.LogInfo("GetAmsV2LawsStatus : $($GetProviderErrorMsg)");
     }
 
 	return $lawsArmId;
@@ -388,7 +388,7 @@ function GetAmsV1LawsArmId([string]$subscriptionId, [string]$resourceGroup, [str
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogInfo("GetAmsV1ProviderStatus : $($GetProviderErrorMsg)");
+		$logger.LogInfo("GetAmsV1LawsStatus : $($GetProviderErrorMsg)");
     }
 	return $lawsArmId;
 }
