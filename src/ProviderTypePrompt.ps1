@@ -1,12 +1,7 @@
-﻿function Check-ProviderTypeInput
+﻿function Update-ProviderTypeInput
 {
-    Add-Type -AssemblyName PresentationCore,PresentationFramework
-    $ButtonType = [System.Windows.MessageBoxButton]::YesNo
-    $MessageIcon = [System.Windows.MessageBoxImage]::Warning
-    $MessageBody = "You have not added specific provider tag. Are you sure you want to migrate all the supported providers?"
-    $MessageTitle = "Confirm Provider type"
-
-    $Result = [System.Windows.MessageBox]::Show($MessageBody,$MessageTitle,$ButtonType,$MessageIcon)
+    $Result = Read-Host -Prompt "You have not added specific provider tag. Are you sure you want to migrate all the supported providers?"
+    Write-Host $Result;
 
     Write-Host "Your choice is $Result"
 
