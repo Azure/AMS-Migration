@@ -109,7 +109,6 @@ DeleteAndPurgeSecretFromKeyVault -keyVaultName $keyVaultName -secretKey $name -l
 #>
 function DeleteAndPurgeSecretFromKeyVault([string]$keyVaultName, [string]$secretKey, $logger) {
 	try {
-		# Add-KeyVaultRoleAssignment -keyVaultName $keyVaultName -logger $logger;
 		Remove-AzKeyVaultSecret -VaultName $keyVaultName -Name $secretKey -PassThru -Force -ErrorAction SilentlyContinue;
 		$logger.LogInfo("Deleted Secret $secretKey from Keyvault $keyVaultName, Sleeping for 15s");
 		Start-Sleep -s 15
