@@ -373,7 +373,7 @@ function GetAmsV1LawsArmId([string]$subscriptionId, [string]$resourceGroup, [str
         "Authorization" = "Bearer $armToken"
     }
 
-    [string]$url = $url = "https://management.azure.com/"
+    [string]$url = "https://management.azure.com/"
 	[string]$subscriptionParams = "subscriptions/" + $subscriptionId;
 	[string]$rgParams = "/resourceGroups/" + $resourceGroup;
 	[string]$providerParams = "/providers/Microsoft.HanaOnAzure/sapMonitors/" + $monitorName + "?api-version=" + $v2ApiVersion;
