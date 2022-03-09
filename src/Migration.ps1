@@ -248,6 +248,10 @@ function Main
 	if($isMigrateAlerts -like "yes") {
 		MigrateLAWSAlerts -LawsDetails $compareLaws -providerType $providerType -logger $logger;
 	}
+	else
+	{
+		$logger.LogInfo("Not migrating Alerts since you entered No");
+	}
 
 	$logFolderPath = Join-Path $PSScriptRoot "\LogFiles\$shortDate"
 	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
