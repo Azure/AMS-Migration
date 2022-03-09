@@ -10,24 +10,23 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 
 - **Deploy new AMS resource:** Please follow [AMS onboarding wiki](https://github.com/Azure/Azure-Monitor-for-SAP-solutions-preview/wiki) to deploy new AMS resource manually.<br> <span style="color:blue"><i>Please note</i></span>: While following onboarding wiki, please deploy only the AMS resource (without providers). Providers will be migrated automatically using the automation script (instructions below). <br><span style="color:blue"><i>Please note:</i></span>: To retain previously collected telemetry data please select checkbox for &quot;Use existing log analytics workspace&quot; while creating new AMS resource. Instructions can be found in On-boarding wiki. This selection will ensure that log analytics workspace associated with your current AMS (classic) resource is used with new AMS resource. Therefore, you will be able to retain previously collected telemetry.
 
-- **Hosts file entries:** If you have one or more active SAP NetWeaver provider, this pre-requite is for you. Please keep hosts.json file or contents of hosts.json file handy. One way to get to contents of hosts.json file by logging into collector VM of AMS (classic) managed resource group.
+- **(Optional) Hosts file entries:** This pre-requisite is applicable for you if you have one or more active SAP NetWeaver provider in AMS (classic) and you have custom DNS for name host-name resolution which was unable to resolve names of SAP systems during SAP NetWeaver provider creation. This pre-requisite entails that you keep hosts.json file handy or have contents of hosts.json file handy. One way to get to contents of hosts.json file by logging into collector VM in AMS (classic) managed resource group. You can follow below steps to log in collector VM:
 
-	- **Steps to configure hosts.txt for SapNetWeaver**
-	1. Go to the collectorVm deployed in managed resource group of AMS1.0 resource. Type serial in the search bar and select Boot Diagnostics.
+	1. Log into Azure portal and navigate to your AMS (classic resource). In overview page, navigate to managed reosurce group -> virtual machine (collector VM). Within 	            overview page of collector VM, there is search box in table of content (left panel). In search box, type 'serial' and select 'Boot Diagnostics'.
 	
-	![Azure Cloud Shell](./src/assets/VmBootDiag.png "Boot Diagnostics")
+	   ![Azure Cloud Shell](./src/assets/VmBootDiag.png "Boot Diagnostics")
 	
-	2. Select the Enable with custom storage account option and select the storage account that is deployed as part of a resource in the managed resource group.
-	![Azure Cloud Shell](./src/assets/SABootDiag.png "Configure Boot Diagnostics with Storage Account")
+	2. In boot diagnostic, click on 'Settings' in top navigation bar and select the 'enable with custom storage account'. From drop down select the storage account which is deployed as part of a AMS (classic) managed resource group.
+	   ![Azure Cloud Shell](./src/assets/SABootDiag.png "Configure Boot Diagnostics with Storage Account")
 	
-	3. Optional step to configure/upate password.Type password in the search text and click on Reset Password. The password can be reset using any of the three modes available. The easiest mode is the Reset Password mode.
+	3. (Optional) Configure/upate password for collector VM.Type password in the search text and click on Reset Password. The password can be reset using any of the three modes available. The easiest mode is the Reset Password mode.
 	![Azure Cloud Shell](./src/assets/collectorVmPsswd.png "Configure VM Password")
 	4. Type serial in the search box and open Serial Console. If not prompted to login, press enter and provide the credentials set in step 3 to login.
 	![Azure Cloud Shell](./src/assets/SerialConsole.png "Serial Console")
-	5. Finally, navigate to /etc/hosts file to find the config for SapNetWeaver provider(s). Run the follwoing command from within the CollectorVm to get to the hosts file.
+	5. Finally, navigate to /etc/hosts file to find host name information. Run the following command from within the Collector VM to get to hosts file.
 
 		> sudo nano /etc/hosts
-	6. You can copy the contents of SapNetWeaver config and paste them in **hosts.txt** file in the /src folder for SapNetWeaver migration.
+	6. Copy contents of hosts file and paste them in **hosts.txt** file in the /src folder for migration of SAP NetWeaver providers. Please ensure that you are copying into hosts.txt in /src folder within the repository that you have previously cloned. 
 
 ## Migration steps
 > Continue running AMS (Azure Monitor for SAP Solutions) 1.0 as is.<br/>Assuming you have completed the pre-requisite you should have a successfully deployed AMS, follow the cmds below to automatically migrate all your SAP HANA &amp; SAP NetWeaver providers.
@@ -72,7 +71,7 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 	Find resource ID for AMS resource: <br/>
 	![ResourceId for AMS V2](./src/assets/ResourceIdAmsV2.png "ResourceId for AMS V2")
 
-7. If you are trying to migrate SAP NetWeaver Providers, you need to update the host file entries also. follow the steps in the below image.
+7. (Optional) If you are migrate SAP NetWeaver providers, you need to update the host file entries before executing migration script. You can do so by copying entries from hosts file under a new hosts.txt file in /src folder within previously cloned repository. 
 	<br/>![ResourceId for AMS V2](./src/assets/hostfile.png "ResourceId for AMS V2")
 
 8. Final script should look like this:
