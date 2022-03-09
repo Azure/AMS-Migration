@@ -17,6 +17,7 @@
 . $PSScriptRoot\ProviderTypePrompt.ps1
 . $PSScriptRoot\AmsOperationsHelper.ps1
 . $PSScriptRoot\Constants.ps1
+. $PSScriptRoot\AlertsHelperFunctions.ps1
 # #############################
 
 <#
@@ -83,6 +84,19 @@ function Main
     $unsupportedProviderList = New-Object System.Collections.ArrayList
 	$emptyNwList = New-Object System.Collections.ArrayList
 	$isFirstNwProvider = $true
+	
+	# set context in AMS v2 Monitor's Subscription.
+	$parsedArmId = Get-ParsedArmId $amsv2ArmId
+	[string]$monitorName = $parsedArmId.amsResourceName;
+	[string]$resourceGroupName = $parsedArmId.amsResourceGroup;
+	[string]$subscriptionId = $parsedArmId.subscriptionId;
+	# Get AMS v2 Managed Resource Group Name.
+	$response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
+	$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
+	$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
+	# Get values for managed keyvault name and function name.
+	[string]$managedKvName = GetAmsV2ManagedKv -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -managedRgName $managedRgName -logger $logger;
+	Add-KeyVaultRoleAssignment -keyVaultName $managedKvName -logger $logger;
 
     foreach ($i in $listOfSecrets)
     {
@@ -214,6 +228,36 @@ function Main
     	$logger.LogInfoObject("Not Migrated AMSv1 Unsupported Provider list - ", $unsupportedProviderList);
 	}
 
+	$compareLaws = Get-CompareLaws -amsv1ArmId $amsv1ArmId -amsv2ArmId $amsv2ArmId -logger $logger
+	$isMigrateAlerts = "";
+
+	if($compareLaws.isEqual -eq $true)
+	{
+		$logger.LogInfo("AMSv1 and AMSv2 LAWS - $($compareLaws.amsv2LawsId) are equal..");
+	}
+	else 
+	{
+		$logger.LogInfo("AMSv1 $($compareLaws.amsv1LawsId) and AMSv2 $($compareLaws.amsv2LawsId) LAWS are NOT equal..");
+		[string]$dialogContent = "Please select an action for Alert Migration.";
+		Write-Host $dialogContent;
+		while (($isMigrateAlerts -ne "yes") -and ($isMigrateAlerts -ne "no")) {
+			$isMigrateAlerts = Read-Host -Prompt "Do you wish to Migrate Alerts? (yes/no)";
+		}
+	}
+
+	if($isMigrateAlerts -like "yes") {
+		MigrateLAWSAlerts -LawsDetails $compareLaws -providerType $providerType -logger $logger;
+	}
+	else
+	{
+		$logger.LogInfo("Not migrating Alerts since you entered No");
+	}
+
+	$logFolderPath = Join-Path $PSScriptRoot "\LogFiles\$shortDate"
+	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
+	Write-Host -ForegroundColor Yellow $logFolderPath;
+	Write-Host -ForegroundColor Yellow "download $fileName.txt";
+
 	$logger.LogInfo("----------- Finished migration to AMSv2 --------------");
 	$logger.LogInfo("--------------- Migration Completed ------------------");
     Stop-Transcript
@@ -221,11 +265,44 @@ function Main
     Get-SapHanaProvidersList $saphanaTransformedList
     Get-SapNetWeaverProvidersList $sapNetWeaverTransformedList
     Get-UnsupportedProvidersList $unsupportedProviderList
+}
 
-	$logFolderPath = Join-Path $PSScriptRoot "\LogFiles\$shortDate"
-	Write-Host "If you are using Cloud Shell, run the below command to download the log file";
-	Write-Host -ForegroundColor Yellow $logFolderPath;
-	Write-Host -ForegroundColor Yellow "download $fileName.txt";
+<#
+.SYNOPSIS
+Function to check if AMSv1 LAWS is same as AMSv2.
+
+.PARAMETER amsv1ArmId
+AMSv1 ARM id 
+
+.PARAMETER amsv2ArmId
+AMSv2 ARM id
+
+.EXAMPLE
+GetProviderV1ProvisioningState -amsv1ArmId $amsv1ArmId -amsv2ArmId $amsv2ArmId;
+#>
+function Get-CompareLaws([string]$amsv1ArmId, [string]$amsv2ArmId, $logger)
+{
+	$logger.LogInfo("Comapring AMSv1 and AMSv2 LAWS..");
+	$parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
+	$parsedv2ArmId = Get-ParsedArmId $amsv2ArmId
+	$isEqual = $false;
+	[string]$amsv1LawsId = GetAmsV1LawsArmId -subscriptionId $parsedv1ArmId.subscriptionId -resourceGroup $parsedv1ArmId.amsResourceGroup -monitorName $parsedv1ArmId.amsResourceName -logger $logger;
+	[string]$amsv2LawsId = GetAmsV2LawsArmId -subscriptionId $parsedv2ArmId.subscriptionId -resourceGroup $parsedv2ArmId.amsResourceGroup -monitorName $parsedv2ArmId.amsResourceName -logger $logger;
+
+	if($amsv1LawsId -eq $amsv2LawsId)
+	{
+		$isEqual = $true;
+	}
+
+	$laws = @{
+		isEqual = $isEqual
+		amsv1LawsId = $amsv1LawsId
+		amsv2LawsId = $amsv2LawsId
+		amsv1ArmID = $amsv1ArmId
+		amsv2ArmId = $amsv2ArmId
+	};
+	return $laws;
+
 }
 
 <#
