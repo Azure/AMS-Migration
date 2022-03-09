@@ -1,12 +1,12 @@
 ﻿param(
 #[Parameter(Mandatory=$true)]
-[string]$providerType = "saphana",
+[string]$providerType = $null,
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv1ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.HanaOnAzure/sapMonitors/ams-v1-migration-full",
+[string]$amsv1ArmId = "<amsv1-arm-id>",
 
 #[Parameter(Mandatory=$true)]
-[string]$amsv2ArmId = "/subscriptions/49d64d54-e966-4c46-a868-1999802b762c/resourceGroups/rg-ams-migration-test/providers/Microsoft.Workloads/monitors/ams-migration-test"
+[string]$amsv2ArmId = "<amsv2-arm-id>"
 )
 
 # ########### Header ###########
@@ -58,7 +58,7 @@ function Main
 	}
 
     $logger.LogInfo("Please select an account to connect to Azure Portal...")
-    #Connect-AzAccount -UseDeviceAuthentication;
+    Connect-AzAccount -UseDeviceAuthentication;
 
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
