@@ -136,7 +136,14 @@ function MigrateLawsAlerts($LawsDetails, $providerType, $logger) {
             }
             else
             {
-                $logger.LogInfo("Unsupported Alert Migration for - $($alertName))");
+                if($alert1.tags.'alert-template-id'.Contains("sapnetweaver") -or $alert1.tags.'alert-template-id'.Contains("saphana"))
+                {
+                    $logger.LogInfo("No Alert Migration for - $($alertName))");
+                }
+                else
+                {
+                    $logger.LogInfo("Unsupported Alert Migration for - $($alertName))");
+                }
             }
         }
     }
