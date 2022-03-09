@@ -44,7 +44,7 @@ function Main
 
     if($providerType -like $null)
     {
-        $providerType = Check-ProviderTypeInput
+        $providerType = Update-ProviderTypeInput
     }
 
 	$allowedProviders = "saphana", "sapnetweaver", "all";
