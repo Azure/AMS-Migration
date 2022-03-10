@@ -85,7 +85,7 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 	![Provider Summary](./src/assets/Summary.png "Provider Summary")
 
 ## Alert Migration steps
-> Continue running AMS Migration Script for Migrating Alerts as is.<br/>Assuming you have completed the provider-migration you should have successfully deployed AMS2.0 providers, follow the cmds below to automatically migrate all your SAP HANA &amp; SAP NetWeaver alerts.
+> Continue running AMS Migration Script for Migrating Alerts as is.<br/>Assuming you have completed the provider-migration you should have successfully deployed AMS2.0 providers, follow the steps below to automatically migrate all your SAP HANA &amp; SAP NetWeaver alerts.
 
 1. After the provider migration completes, the migration script will check if the Log Analytics workspace(LAWS) is same or different in AMS1.0 and AMS2.0.
 	- If the LAWS is same then no Alert migration is required.
