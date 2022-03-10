@@ -84,15 +84,27 @@ Below are steps to migrate AMS (classic) to AMS monitor resource.
 	After the script executes successfully, you will see the following output. <br/>
 	![Provider Summary](./src/assets/Summary.png "Provider Summary")
 
+## Alert Migration steps
+> Continue running AMS Migration Script for Migrating Alerts as is.<br/>Assuming you have completed the provider-migration you should have successfully deployed AMS2.0 providers, follow the steps below to automatically migrate all your SAP HANA &amp; SAP NetWeaver alerts.
+
+1. After the provider migration completes, the migration script will check if the Log Analytics workspace(LAWS) is same or different in AMS1.0 and AMS2.0.
+	- If the LAWS is same then no Alert migration is required.
+2. If the LAWS is different you would be presented with a choice to migrate the Alerts. You can type 'yes' if you wish to migrate the alerts or enter 'no' otherwise.
+	![Alert Migration](./src/assets/AlertChoice.png "Alert Migration")
+3. If your choice is 'yes' then all the alerts will be migrated from AMS1.0 LAWS to AMS2.0 LAWS.
+4. Please note if your choice was to migrate only providers of type SapHana or SapNetWeaver then only the providerType specfic alerts will be migrated. If you chose to migrate 'all' providers then all the supported provider alerts would be migrated.
+5. Below is an example of the ouput when user chooses to migrate only SapHana Alerts. Only SapHana specific alerts are migrated.
+![Alert Migration Completed](./src/assets/FinalAlerts.png "Alert Migration Completed")
+6. The Alert Migration is successfully completed now!
+
+## Optional: 
+You can also manually recreate all alert rules for SAP HANA &amp; SAP NetWeaver in new AMS resource incase you opted for not migrating them via the migration script.
 
 ## Optional but HIGHLY Recommended 
 
 After successfully migrating all SAP HANA &amp; SAP NetWeaver providers, navigate back to AMS (classic) resource and manually delete all SAP HANA &amp; SAP NetWeaver providers. Since these providers have already migrated to AMS resource you will continue to receive monitoring telemetry in same Log Analytics workspace from these.
 
 <span style="color:blue"><i>Please note</i></span>: You can choose to not delete these providers in AMS (classic) resource after successfully migrating these providers – AMS will work just fine. However, you will incur additional costs on log analytics workspace since duplicate data will get pumped into it (from both AMS (classic) and AMS). Therefore, we highly recommend that you delete all successfully migrated providers from AMS (classic) resource.
-
-## Optional: 
-Manually recreate all alert rules for SAP HANA &amp; SAP NetWeaver in new AMS resource.
 
 ## Important:
 > Please DO NOT DELETE AMS (classic) resource even after successfully migrating all providers.
