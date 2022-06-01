@@ -60,8 +60,13 @@ function Main
     $logger.LogInfo("Please select an account to connect to Azure Portal...")
     Connect-AzAccount -UseDeviceAuthentication;
 
+    $logger.LogInfoObject("Selected provider type for current migration is - ", $providerType)
+
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
+
+    $parsedv2ArmId = Get-ParsedArmId $amsv2ArmId
+    $logger.LogInfoObject("Parsed AMSv2 ARM id - ", $parsedv2ArmId)
 
     Set-CurrentContext -subscriptionId $parsedv1ArmId.subscriptionId -logger $logger;
 
@@ -415,7 +420,7 @@ function MigrateHanaProvider([string]$secretName, $secretValue, $logger) {
 	# default providioning state is accepted, we will keep checking till is changes.
 	$provisioningState = "Accepted";
 		
-	while ($checks -le 45 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
+	while ($checks -le 45 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating" -or $provisioningState -like "Updating")) {
 
 		Start-Sleep -s 20
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
@@ -553,7 +558,7 @@ function MigrateNetWeaverProvider([string]$secretName, $secretValue, $hostfile, 
 	# default providioning state is accepted, we will keep checking till is changes.
 	$provisioningState = "Accepted";
 		
-	while ($checks -le 45 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating")) {
+	while ($checks -le 45 -and ($provisioningState -like "Accepted" -or $provisioningState -like "Creating" -or $provisioningState -like "Updating")) {
 		Start-Sleep -s 20
 		$getResponse = GetAmsV2ProviderStatus -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -providerName $providerName -logger $logger;
 		$provisioningState = $getResponse.provisiongState;

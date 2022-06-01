@@ -61,7 +61,7 @@ function PutAmsV2Provider([string]$subscriptionId, [string]$resourceGroup, [stri
 
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 
-	$logger.LogInfo("Making Put Provider call with $url")
+	$logger.LogInfo("[AMS V2] Making Put Provider for call with $url")
 	try
     {
         $response = Invoke-RestMethod -Method 'Put' -Uri $url -Headers $headers -Body $bodyStr
@@ -119,7 +119,7 @@ function GetAmsV2ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
 	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	$logger.LogInfo("Making Get Provider call with $url")
+	$logger.LogInfo("[AMS V2] Making Get Provider call with $url")
     
 	try
     {
@@ -231,7 +231,7 @@ function GetAmsV2MonitorProperties([string]$subscriptionId, [string]$resourceGro
 	[string]$providerParams = "/providers/Microsoft.Workloads/monitors/" + $monitorName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	$logger.LogInfo("Making Get Monitor call with $url");
+	$logger.LogInfo("[AMS V2] Making Get Monitor call with $url");
     
 	try
     {
@@ -278,18 +278,18 @@ function GetAmsV2ManagedKv([string]$subscriptionId, [string]$resourceGroup, [str
 	[string]$managedKvName = "";
 	try
     {
-        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
+        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroup -monitorName $monitorName -logger $logger
 		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
-		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
+		$logger.LogInfo("[AMS V2] Managed RG Name associated with Monitor : $monitorName is $managedRgName");
 
 		$kvDetails = Get-AzResource -ResourceGroupName $managedRgName -ResourceType Microsoft.KeyVault/vaults
-		$logger.LogInfo("Managed KV Name associated with Monitor : $monitorName is $($kvDetails.Name)");
+		$logger.LogInfo("[AMS V2] Managed KV Name associated with Monitor : $monitorName is $($kvDetails.Name)");
 		$managedKvName = $kvDetails.Name;
     }
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogError("GetAmsV2ManagedKv : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
+		$logger.LogError("[AMS V2] GetAmsV2ManagedKv : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
     }
 
 	return $managedKvName;
@@ -324,18 +324,18 @@ function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [s
 	[string]$managedFuncName = "";
 	try
     {
-        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
+        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroup -monitorName $monitorName -logger $logger
 		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
-		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
+		$logger.LogInfo("[AMS V2] Managed RG Name associated with Monitor : $monitorName is $managedRgName");
 
 		$funcDetails = Get-AzResource -ResourceGroupName $managedRgName -Name "$providerType*" -ResourceType Microsoft.Web/sites
-		$logger.LogInfo("Function app for Provider $providerName with Monitor : $monitorName is $($funcDetails.Name)");
+		$logger.LogInfo("[AMS V2] Function app for Provider $providerName with Monitor : $monitorName is $($funcDetails.Name)");
 		$managedFuncName = $funcDetails.Name;
     }
     catch
     {
         $GetProviderErrorMsg = $_.ErrorDetails.ToString();
-		$logger.LogError("GetAmsV2ManagedKv : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
+		$logger.LogError("[AMS V2] GetAmsV2ManagedKv : Failed with error: ($($GetProviderErrorMsg.error.code)))", "500", "");
     }
 
 	return $managedFuncName;
@@ -434,7 +434,7 @@ function GetAmsV1ProviderStatus([string]$subscriptionId, [string]$resourceGroup,
 	[string]$providerParams = "/providers/Microsoft.HanaOnAzure/sapMonitors/" + $monitorName + "/providerInstances/" + $providerName + "?api-version=" + $v2ApiVersion;
 	$url = $url + $subscriptionParams + $rgParams + $providerParams;
 	[string]$provisiongState = "";
-	$logger.LogInfo("Making Get Provider call with $url");
+	$logger.LogInfo("[AMS V1] Making Get Provider call with $url");
     
 	try
     {
