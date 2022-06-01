@@ -225,7 +225,7 @@ function GetAmsV2ManagedKv([string]$subscriptionId, [string]$resourceGroup, [str
 	[string]$managedKvName = "";
 	try
     {
-        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
+        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroup -monitorName $monitorName -logger $logger
 		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
 		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
 
@@ -271,7 +271,7 @@ function GetAmsV2ManagedFunc([string]$subscriptionId, [string]$resourceGroup, [s
 	[string]$managedFuncName = "";
 	try
     {
-        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroupName -monitorName $monitorName -logger $logger
+        $response = GetAmsV2MonitorProperties -subscriptionId $subscriptionId -resourceGroup $resourceGroup -monitorName $monitorName -logger $logger
 		$managedRgName = $response.Response.properties.managedResourceGroupConfiguration.name;
 		$logger.LogInfo("Managed RG Name associated with Monitor : $monitorName is $managedRgName");
 
