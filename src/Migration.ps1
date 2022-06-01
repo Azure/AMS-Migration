@@ -59,6 +59,8 @@ function Main
     $logger.LogInfo("Please select an account to connect to Azure Portal...")
     Connect-AzAccount -UseDeviceAuthentication;
 
+    $logger.LogInfoObject("Selected provider type for current migration is - ", $providerType)
+
     $parsedv1ArmId = Get-ParsedArmId $amsv1ArmId
     $logger.LogInfoObject("Parsed AMSv1 ARM id - ", $parsedv1ArmId)
 
